@@ -1,0 +1,34 @@
+{
+  "name": "Al Baraa Portfolio",
+  "description": "Personal portfolio website built with Laravel",
+  "keywords": ["laravel", "portfolio", "php"],
+  "website": "https://github.com/Baraa732/My-Portfolio",
+  "repository": "https://github.com/Baraa732/My-Portfolio",
+  "logo": "https://laravel.com/img/logomark.min.svg",
+  "success_url": "/",
+  "scripts": {
+    "postdeploy": "php artisan key:generate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache"
+  },
+  "env": {
+    "APP_ENV": {
+      "value": "production"
+    },
+    "APP_DEBUG": {
+      "value": "false"
+    },
+    "APP_KEY": {
+      "generator": "secret"
+    },
+    "DB_CONNECTION": {
+      "value": "sqlite"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/php"
+    },
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
