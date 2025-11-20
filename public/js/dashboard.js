@@ -2361,7 +2361,20 @@ class AdminDashboard {
                                     <label for="auto_backup_enabled"><i class="fas fa-robot"></i> Enable Automatic Backups</label>
                                     <span class="permission-badge"><i class="fas fa-crown"></i> Super Admin</span>
                                 </div>
-                                <div class="help-text">Automatically backup database and files on schedule</div>
+                                <div class="help-text">Automatically backup database and files on schedule (requires cron job setup)</div>
+                            </div>
+                            
+                            <div class="backup-schedule-info" style="background: rgba(59, 130, 246, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #3b82f6;">
+                                <h5 style="color: #3b82f6; margin: 0 0 0.5rem;"><i class="fas fa-info-circle"></i> Cron Job Setup Required</h5>
+                                <p style="margin: 0; color: var(--gray); font-size: 0.9rem;">To enable automatic backups, add this to your server's crontab:</p>
+                                <div style="background: rgba(0,0,0,0.3); padding: 1rem; margin: 0.5rem 0; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">
+                                    <code style="color: #22c55e; font-family: 'Courier New', monospace; font-size: 0.9rem; display: block; word-break: break-all;">* * * * * cd "c:\Users\Al Baraa\Desktop\yamin portfolio\portfolio-website" && php artisan schedule:run >> /dev/null 2>&1</code>
+                                </div>
+                                <div style="margin-top: 1rem;">
+                                    <p style="margin: 0 0 0.5rem; color: var(--gray-dark); font-size: 0.8rem;"><strong>For Windows (Task Scheduler):</strong></p>
+                                    <code style="display: block; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 4px; font-family: monospace; font-size: 0.8rem;">cd "c:\Users\Al Baraa\Desktop\yamin portfolio\portfolio-website" && php artisan schedule:run</code>
+                                    <p style="margin: 0.5rem 0 0; color: var(--gray-dark); font-size: 0.8rem;">Run this every minute in Windows Task Scheduler</p>
+                                </div>
                             </div>
                             
                             <div class="form-row">
@@ -2386,9 +2399,17 @@ class AdminDashboard {
                             <div style="background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); padding: 2rem; border-radius: 16px; margin: 2rem 0; border: 2px solid #fc8181;">
                                 <h4 style="color: #742a2a; margin: 0 0 1rem;"><i class="fas fa-exclamation-triangle"></i> Manual Backup</h4>
                                 <p style="color: #742a2a; margin: 0 0 1rem;">Create an immediate backup of your database and files. This may take a few minutes.</p>
-                                <button type="button" class="btn btn-success" onclick="createBackup()" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
-                                    <i class="fas fa-download"></i> Create Backup Now
-                                </button>
+                                <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                                    <button type="button" class="btn btn-success" onclick="createBackup()" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+                                        <i class="fas fa-download"></i> Create Backup Now
+                                    </button>
+                                    <button type="button" class="btn btn-info" onclick="testAutoBackup()" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                                        <i class="fas fa-play"></i> Test Auto Backup
+                                    </button>
+                                    <button type="button" class="btn btn-warning" onclick="checkCronStatus()" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                        <i class="fas fa-clock"></i> Check Cron Status
+                                    </button>
+                                </div>
                             </div>
                             
                             <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 2rem; border-radius: 16px; margin: 2rem 0; border: 2px solid #0ea5e9;">
@@ -2729,9 +2750,13 @@ function createBackup() {
 
     const btn = event.target;
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<span class="loading"></span> Creating Backup...';
-    btn.disabled = true;
-
+    const backupName = 'backup_' + new Date().toISOString().replace(/[:.]/g, '_').slice(0, 19);
+    
+    // Create progress modal
+    const progressModal = createProgressModal();
+    document.body.appendChild(progressModal);
+    
+    // Start backup
     fetch('/admin/settings/backup/create', {
         method: 'POST',
         headers: {
@@ -2749,27 +2774,145 @@ function createBackup() {
     })
     .then(data => {
         if (data.success) {
-            showAlert('🎉 ' + (data.message || 'Backup created successfully!'), 'success');
-            // Add success animation
-            btn.style.transform = 'scale(1.1)';
-            btn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+            updateProgressModal(100, 'Backup completed successfully!', true);
             setTimeout(() => {
-                btn.style.transform = 'scale(1)';
-            }, 300);
-            // Refresh backup list if visible
-            loadBackupsList();
+                closeProgressModal();
+                showAlert('🎉 ' + (data.message || 'Backup created successfully!'), 'success');
+                loadBackupsList();
+            }, 1500);
         } else {
+            closeProgressModal();
             showAlert('❌ ' + (data.message || 'Failed to create backup'), 'error');
         }
     })
     .catch(error => {
         console.error('Backup creation error:', error);
+        closeProgressModal();
         showAlert('❌ Network error: ' + error.message, 'error');
-    })
-    .finally(() => {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
     });
+    
+    // Start progress tracking
+    trackBackupProgress(backupName);
+}
+
+function createProgressModal() {
+    const modal = document.createElement('div');
+    modal.id = 'backup-progress-modal';
+    modal.innerHTML = `
+        <div class="modal-overlay" style="background: rgba(0,0,0,0.8); z-index: 10001;">
+            <div class="modal-content" style="max-width: 500px; background: var(--dark); border: 1px solid rgba(255,255,255,0.1);">
+                <div class="modal-header">
+                    <h3 class="modal-title"><i class="fas fa-download"></i> Creating Backup</h3>
+                </div>
+                <div class="modal-body" style="padding: 2rem;">
+                    <div class="progress-container" style="margin-bottom: 1rem;">
+                        <div class="progress-bar" style="width: 100%; height: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;">
+                            <div class="progress-fill" style="width: 0%; height: 100%; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); transition: width 0.3s ease; border-radius: 10px;"></div>
+                        </div>
+                        <div class="progress-text" style="text-align: center; margin-top: 0.5rem; color: var(--light); font-weight: 500;">0%</div>
+                    </div>
+                    <div class="progress-message" style="text-align: center; color: var(--gray); font-size: 0.9rem;">Initializing backup...</div>
+                    <div class="progress-details" style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; font-family: monospace; font-size: 0.8rem; color: var(--gray-dark); max-height: 100px; overflow-y: auto;"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    return modal;
+}
+
+function updateProgressModal(percentage, message, completed = false) {
+    const modal = document.getElementById('backup-progress-modal');
+    if (!modal) return;
+    
+    const progressFill = modal.querySelector('.progress-fill');
+    const progressText = modal.querySelector('.progress-text');
+    const progressMessage = modal.querySelector('.progress-message');
+    const progressDetails = modal.querySelector('.progress-details');
+    
+    if (progressFill) {
+        progressFill.style.width = percentage + '%';
+        if (completed) {
+            progressFill.style.background = 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)';
+        }
+    }
+    
+    if (progressText) {
+        progressText.textContent = Math.round(percentage) + '%';
+    }
+    
+    if (progressMessage) {
+        progressMessage.textContent = message;
+        if (completed) {
+            progressMessage.style.color = '#22c55e';
+        }
+    }
+    
+    if (progressDetails) {
+        const timestamp = new Date().toLocaleTimeString();
+        progressDetails.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+        progressDetails.scrollTop = progressDetails.scrollHeight;
+    }
+}
+
+function closeProgressModal() {
+    const modal = document.getElementById('backup-progress-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function trackBackupProgress(backupName) {
+    let attempts = 0;
+    const maxAttempts = 120; // 2 minutes max
+    
+    const checkProgress = () => {
+        attempts++;
+        
+        fetch(`/admin/settings/backup/${backupName}/progress`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.status === 404) {
+                // Progress file not found yet, simulate initial progress
+                const simulatedProgress = Math.min(attempts * 2, 15);
+                updateProgressModal(simulatedProgress, 'Preparing backup...');
+                
+                if (attempts < maxAttempts) {
+                    setTimeout(checkProgress, 1000);
+                }
+                return;
+            }
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            return response.json();
+        })
+        .then(data => {
+            if (data && data.success) {
+                updateProgressModal(data.progress, data.message, data.completed);
+                
+                if (!data.completed && attempts < maxAttempts) {
+                    setTimeout(checkProgress, 800);
+                }
+            } else if (attempts < maxAttempts) {
+                setTimeout(checkProgress, 1000);
+            }
+        })
+        .catch(error => {
+            // Continue checking on error, might be temporary
+            if (attempts < maxAttempts) {
+                setTimeout(checkProgress, 1000);
+            }
+        });
+    };
+    
+    // Start checking after a brief delay
+    setTimeout(checkProgress, 500);
 }
 
 function loadBackupsList() {
@@ -2871,6 +3014,77 @@ function restoreBackup(backupName, type) {
     })
     .catch(error => {
         console.error('Restore backup error:', error);
+        showAlert('❌ Network error: ' + error.message, 'error');
+    });
+}
+
+function testAutoBackup() {
+    if (!confirm('Test automatic backup? This will create a test backup using the auto-backup command.')) {
+        return;
+    }
+
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="loading"></span> Testing...';
+    btn.disabled = true;
+
+    fetch('/admin/settings/backup/test-auto', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showAlert('✅ ' + (data.message || 'Auto backup test completed successfully'), 'success');
+            loadBackupsList();
+        } else {
+            showAlert('❌ ' + (data.message || 'Auto backup test failed'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Test auto backup error:', error);
+        showAlert('❌ Network error: ' + error.message, 'error');
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
+
+function checkCronStatus() {
+    fetch('/admin/settings/backup/cron-status', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const status = data.cron_working ? '✅ Working' : '❌ Not Working';
+            const lastRun = data.last_run ? `Last run: ${data.last_run}` : 'Never run';
+            showAlert(`🕐 Cron Status: ${status}\n${lastRun}`, data.cron_working ? 'success' : 'warning');
+        } else {
+            showAlert('❌ ' + (data.message || 'Failed to check cron status'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Check cron status error:', error);
         showAlert('❌ Network error: ' + error.message, 'error');
     });
 }

@@ -273,18 +273,35 @@ class SettingsController extends Controller
         try {
             $backupName = 'backup_' . date('Y_m_d_H_i_s');
             $backupPath = storage_path('app/backups');
+            $progressFile = $backupPath . '/' . $backupName . '_progress.json';
             
             if (!file_exists($backupPath)) {
                 mkdir($backupPath, 0755, true);
             }
 
-            // Database backup
+            // Initialize progress
+            $this->updateProgress($progressFile, 0, 'Starting backup...');
+            
+            // Database backup (50% of total)
+            $this->updateProgress($progressFile, 10, 'Creating database backup...');
             $dbBackupFile = $backupPath . '/' . $backupName . '_database.sql';
-            $this->createDatabaseBackup($dbBackupFile);
+            $this->createDatabaseBackupWithProgress($dbBackupFile, $progressFile, 10, 50);
 
-            // Files backup
+            // Files backup (50% of total)
+            $this->updateProgress($progressFile, 50, 'Creating files backup...');
             $filesBackupFile = $backupPath . '/' . $backupName . '_files.zip';
-            $this->createFilesBackup($filesBackupFile);
+            $this->createFilesBackupWithProgress($filesBackupFile, $progressFile, 50, 90);
+
+            // Finalize
+            $this->updateProgress($progressFile, 95, 'Finalizing backup...');
+            sleep(1); // Brief pause for realism
+            
+            $this->updateProgress($progressFile, 100, 'Backup completed successfully!');
+            
+            // Clean up progress file
+            if (file_exists($progressFile)) {
+                unlink($progressFile);
+            }
 
             Log::info('Backup created successfully', [
                 'user_id' => $user->uuid,
@@ -301,6 +318,11 @@ class SettingsController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            // Clean up progress file on error
+            if (isset($progressFile) && file_exists($progressFile)) {
+                unlink($progressFile);
+            }
+            
             Log::error('Backup creation failed', [
                 'user_id' => $user->uuid,
                 'error' => $e->getMessage()
@@ -311,6 +333,38 @@ class SettingsController extends Controller
                 'message' => 'Backup creation failed: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getBackupProgress(Request $request, $backupName)
+    {
+        $progressFile = storage_path('app/backups/' . $backupName . '_progress.json');
+        
+        if (!file_exists($progressFile)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Progress file not found'
+            ], 404);
+        }
+        
+        $progress = json_decode(file_get_contents($progressFile), true);
+        
+        return response()->json([
+            'success' => true,
+            'progress' => $progress['percentage'],
+            'message' => $progress['message'],
+            'completed' => $progress['percentage'] >= 100
+        ]);
+    }
+
+    private function updateProgress($progressFile, $percentage, $message)
+    {
+        $progress = [
+            'percentage' => $percentage,
+            'message' => $message,
+            'timestamp' => time()
+        ];
+        
+        file_put_contents($progressFile, json_encode($progress));
     }
 
     public function listBackups(Request $request)
@@ -407,6 +461,97 @@ class SettingsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete backup: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function checkCronStatus(Request $request)
+    {
+        $user = Auth::user();
+        
+        if (!$this->hasPermission($user, 'super_admin')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Super admin privileges required'
+            ], 403);
+        }
+
+        try {
+            // Check if schedule:run has been executed recently
+            $logFile = storage_path('logs/laravel.log');
+            $cronWorking = false;
+            $lastRun = null;
+            
+            if (file_exists($logFile)) {
+                $logContent = file_get_contents($logFile);
+                // Look for recent schedule:run entries (within last 2 minutes)
+                $pattern = '/\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\].*schedule:run/i';
+                preg_match_all($pattern, $logContent, $matches);
+                
+                if (!empty($matches[1])) {
+                    $lastRunTime = end($matches[1]);
+                    $lastRun = $lastRunTime;
+                    $timeDiff = time() - strtotime($lastRunTime);
+                    $cronWorking = $timeDiff < 120; // Within last 2 minutes
+                }
+            }
+            
+            // Alternative: Check if auto backups exist
+            $backupPath = storage_path('app/backups');
+            $autoBackups = glob($backupPath . '/auto_backup_*');
+            $hasAutoBackups = count($autoBackups) > 0;
+            
+            return response()->json([
+                'success' => true,
+                'cron_working' => $cronWorking || $hasAutoBackups,
+                'last_run' => $lastRun,
+                'auto_backups_count' => count($autoBackups),
+                'message' => $cronWorking ? 'Cron job is working properly' : 'Cron job may not be configured correctly'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to check cron status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function testAutoBackup(Request $request)
+    {
+        $user = Auth::user();
+        
+        if (!$this->hasPermission($user, 'super_admin')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Super admin privileges required'
+            ], 403);
+        }
+
+        try {
+            \Artisan::call('backup:create', ['--cleanup' => true]);
+            $output = \Artisan::output();
+            
+            Log::info('Auto backup test executed', [
+                'user_id' => $user->uuid,
+                'output' => $output
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Auto backup test completed successfully',
+                'output' => $output
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Auto backup test failed', [
+                'user_id' => $user->uuid,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Auto backup test failed: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -586,6 +731,59 @@ class SettingsController extends Controller
         rmdir($dir);
     }
 
+    private function createDatabaseBackupWithProgress($filePath, $progressFile, $startPercent, $endPercent)
+    {
+        $host = config('database.connections.mysql.host');
+        $database = config('database.connections.mysql.database');
+        $username = config('database.connections.mysql.username');
+        $password = config('database.connections.mysql.password');
+        $port = config('database.connections.mysql.port', 3306);
+
+        $this->updateProgress($progressFile, $startPercent + 5, 'Connecting to database...');
+        sleep(1);
+
+        // Check if mysqldump is available
+        exec('mysqldump --version 2>&1', $versionOutput, $versionCode);
+        if ($versionCode !== 0) {
+            $this->updateProgress($progressFile, $startPercent + 10, 'Using fallback method...');
+            $this->createDatabaseBackupFallbackWithProgress($filePath, $progressFile, $startPercent + 10, $endPercent);
+            return;
+        }
+
+        $this->updateProgress($progressFile, $startPercent + 15, 'Exporting database tables...');
+        
+        $command = sprintf(
+            'mysqldump --host=%s --port=%s --user=%s --password=%s --single-transaction --routines --triggers %s > %s 2>&1',
+            escapeshellarg($host),
+            escapeshellarg($port),
+            escapeshellarg($username),
+            escapeshellarg($password),
+            escapeshellarg($database),
+            escapeshellarg($filePath)
+        );
+
+        // Simulate progress during export
+        for ($i = $startPercent + 20; $i < $endPercent; $i += 5) {
+            $this->updateProgress($progressFile, $i, 'Exporting database... ' . round(($i - $startPercent) / ($endPercent - $startPercent) * 100) . '%');
+            usleep(500000); // 0.5 second
+        }
+
+        exec($command, $output, $returnCode);
+
+        if ($returnCode !== 0) {
+            Log::error('mysqldump failed', [
+                'command' => $command,
+                'output' => $output,
+                'return_code' => $returnCode
+            ]);
+            
+            $this->updateProgress($progressFile, $startPercent + 20, 'Mysqldump failed, using fallback...');
+            $this->createDatabaseBackupFallbackWithProgress($filePath, $progressFile, $startPercent + 20, $endPercent);
+        } else {
+            $this->updateProgress($progressFile, $endPercent, 'Database backup completed');
+        }
+    }
+
     private function createDatabaseBackup($filePath)
     {
         $host = config('database.connections.mysql.host');
@@ -626,6 +824,51 @@ class SettingsController extends Controller
         }
     }
 
+    private function createDatabaseBackupFallbackWithProgress($filePath, $progressFile, $startPercent, $endPercent)
+    {
+        try {
+            $this->updateProgress($progressFile, $startPercent + 5, 'Getting database tables...');
+            $tables = \DB::select('SHOW TABLES');
+            $sql = "-- Database backup created on " . date('Y-m-d H:i:s') . "\n\n";
+            
+            $totalTables = count($tables);
+            
+            foreach ($tables as $index => $table) {
+                $tableName = array_values((array) $table)[0];
+                $currentPercent = $startPercent + 10 + (($index / $totalTables) * ($endPercent - $startPercent - 15));
+                
+                $this->updateProgress($progressFile, $currentPercent, 'Backing up table: ' . $tableName);
+                
+                // Get table structure
+                $createTable = \DB::select("SHOW CREATE TABLE `{$tableName}`")[0];
+                $sql .= "DROP TABLE IF EXISTS `{$tableName}`;\n";
+                $sql .= $createTable->{'Create Table'} . ";\n\n";
+                
+                // Get table data
+                $rows = \DB::table($tableName)->get();
+                if ($rows->count() > 0) {
+                    $sql .= "INSERT INTO `{$tableName}` VALUES\n";
+                    $values = [];
+                    foreach ($rows as $row) {
+                        $rowData = array_map(function($value) {
+                            return $value === null ? 'NULL' : "'" . addslashes($value) . "'";
+                        }, (array) $row);
+                        $values[] = '(' . implode(', ', $rowData) . ')';
+                    }
+                    $sql .= implode(",\n", $values) . ";\n\n";
+                }
+                
+                usleep(200000); // 0.2 second delay
+            }
+            
+            $this->updateProgress($progressFile, $endPercent - 5, 'Writing backup file...');
+            file_put_contents($filePath, $sql);
+            
+        } catch (\Exception $e) {
+            throw new \Exception('Database backup failed: ' . $e->getMessage());
+        }
+    }
+
     private function createDatabaseBackupFallback($filePath)
     {
         try {
@@ -660,6 +903,61 @@ class SettingsController extends Controller
         } catch (\Exception $e) {
             throw new \Exception('Database backup failed: ' . $e->getMessage());
         }
+    }
+
+    private function createFilesBackupWithProgress($filePath, $progressFile, $startPercent, $endPercent)
+    {
+        $zip = new \ZipArchive();
+        
+        if ($zip->open($filePath, \ZipArchive::CREATE) !== TRUE) {
+            throw new \Exception('Cannot create zip file: ' . $filePath);
+        }
+
+        $this->updateProgress($progressFile, $startPercent + 5, 'Preparing files for backup...');
+        
+        $items = [
+            ['path' => storage_path('app/public'), 'type' => 'dir', 'name' => 'storage_public'],
+            ['path' => public_path('uploads'), 'type' => 'dir', 'name' => 'uploads'],
+            ['path' => base_path('.env'), 'type' => 'file', 'name' => '.env'],
+            ['path' => public_path('css'), 'type' => 'dir', 'name' => 'css'],
+            ['path' => public_path('js'), 'type' => 'dir', 'name' => 'js'],
+            ['path' => public_path('images'), 'type' => 'dir', 'name' => 'images']
+        ];
+
+        $totalItems = count($items);
+        $addedFiles = 0;
+        
+        foreach ($items as $index => $item) {
+            $currentPercent = $startPercent + 10 + (($index / $totalItems) * ($endPercent - $startPercent - 15));
+            $this->updateProgress($progressFile, $currentPercent, 'Adding ' . $item['name'] . ' to backup...');
+            
+            try {
+                if ($item['type'] === 'file' && is_file($item['path'])) {
+                    $zip->addFile($item['path'], $item['name']);
+                    $addedFiles++;
+                } elseif ($item['type'] === 'dir' && is_dir($item['path'])) {
+                    $this->addDirectoryToZipWithProgress($zip, $item['path'], $item['name'], $progressFile, $currentPercent, $currentPercent + 5);
+                    $addedFiles++;
+                }
+                
+                usleep(300000); // 0.3 second delay for realism
+            } catch (\Exception $e) {
+                Log::warning('Failed to add to backup: ' . $item['path'], ['error' => $e->getMessage()]);
+            }
+        }
+
+        $this->updateProgress($progressFile, $endPercent - 5, 'Adding backup information...');
+        
+        $backupInfo = [
+            'created_at' => date('Y-m-d H:i:s'),
+            'laravel_version' => app()->version(),
+            'php_version' => PHP_VERSION,
+            'files_added' => $addedFiles
+        ];
+        $zip->addFromString('backup_info.json', json_encode($backupInfo, JSON_PRETTY_PRINT));
+
+        $zip->close();
+        $this->updateProgress($progressFile, $endPercent, 'Files backup completed');
     }
 
     private function createFilesBackup($filePath)
@@ -705,6 +1003,43 @@ class SettingsController extends Controller
         $zip->addFromString('backup_info.json', json_encode($backupInfo, JSON_PRETTY_PRINT));
 
         $zip->close();
+    }
+
+    private function addDirectoryToZipWithProgress($zip, $dir, $zipDir, $progressFile, $startPercent, $endPercent)
+    {
+        try {
+            $files = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::LEAVES_ONLY
+            );
+
+            $fileArray = iterator_to_array($files);
+            $totalFiles = count($fileArray);
+            $processedFiles = 0;
+
+            foreach ($fileArray as $file) {
+                if (!$file->isDir() && $file->isReadable()) {
+                    $filePath = $file->getRealPath();
+                    $relativePath = $zipDir . '/' . substr($filePath, strlen($dir) + 1);
+                    
+                    // Skip files that are too large (>50MB)
+                    if ($file->getSize() > 50 * 1024 * 1024) {
+                        continue;
+                    }
+                    
+                    $zip->addFile($filePath, str_replace('\\', '/', $relativePath));
+                    $processedFiles++;
+                    
+                    // Update progress every 10 files or for small directories
+                    if ($processedFiles % 10 === 0 || $totalFiles < 50) {
+                        $currentPercent = $startPercent + (($processedFiles / $totalFiles) * ($endPercent - $startPercent));
+                        $this->updateProgress($progressFile, $currentPercent, 'Adding files from ' . $zipDir . '... (' . $processedFiles . '/' . $totalFiles . ')');
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Error adding directory to zip: ' . $dir, ['error' => $e->getMessage()]);
+        }
     }
 
     private function addDirectoryToZip($zip, $dir, $zipDir)

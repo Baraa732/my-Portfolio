@@ -113,6 +113,9 @@ Route::middleware(['admin', 'rate.limit:300,1', 'sanitize'])->prefix('admin')->n
     Route::get('/settings/backup/list', [\App\Http\Controllers\SettingsController::class, 'listBackups'])->name('settings.backup.list');
     Route::delete('/settings/backup/{backupName}', [\App\Http\Controllers\SettingsController::class, 'deleteBackup'])->name('settings.backup.delete');
     Route::post('/settings/backup/{backupName}/restore', [\App\Http\Controllers\SettingsController::class, 'restoreBackup'])->name('settings.backup.restore');
+    Route::post('/settings/backup/test-auto', [\App\Http\Controllers\SettingsController::class, 'testAutoBackup'])->name('settings.backup.test-auto');
+    Route::get('/settings/backup/cron-status', [\App\Http\Controllers\SettingsController::class, 'checkCronStatus'])->name('settings.backup.cron-status');
+    Route::get('/settings/backup/{backupName}/progress', [\App\Http\Controllers\SettingsController::class, 'getBackupProgress'])->name('settings.backup.progress');
 });
 
 Route::get('/blog', function () {
