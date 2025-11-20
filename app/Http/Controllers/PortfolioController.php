@@ -10,6 +10,7 @@ use App\Models\Contact;
 use App\Models\User;
 use App\Models\Analytics;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PortfolioController extends Controller
 {
@@ -19,9 +20,13 @@ class PortfolioController extends Controller
         $homeSection = Section::where('name', 'home')->first();
         $projects = Project::where('is_active', true)->orderBy('order')->get();
         
-        // Get ecosystem skills for home page
-        $javascriptSkills = SkillEcosystem::byEcosystem('javascript')->active()->ordered()->limit(3)->get();
-        $phpSkills = SkillEcosystem::byEcosystem('php')->active()->ordered()->limit(3)->get();
+        // Get ecosystem skills for home page with caching
+        $javascriptSkills = Cache::remember('skills.home.javascript', 3600, function () {
+            return SkillEcosystem::byEcosystem('javascript')->active()->ordered()->limit(3)->get();
+        });
+        $phpSkills = Cache::remember('skills.home.php', 3600, function () {
+            return SkillEcosystem::byEcosystem('php')->active()->ordered()->limit(3)->get();
+        });
 
         return view('portfolio.home', compact('homeSection', 'projects', 'javascriptSkills', 'phpSkills'));
     }
@@ -35,14 +40,22 @@ class PortfolioController extends Controller
 
     public function skills()
     {
-        // Get ecosystem sections and skills
-        $javascriptSection = EcosystemSection::where('ecosystem', 'javascript')->visible()->first();
-        $phpSection = EcosystemSection::where('ecosystem', 'php')->visible()->first();
+        // Get ecosystem sections and skills with caching
+        $javascriptSection = Cache::remember('sections.javascript', 3600, function () {
+            return EcosystemSection::where('ecosystem', 'javascript')->visible()->first();
+        });
+        $phpSection = Cache::remember('sections.php', 3600, function () {
+            return EcosystemSection::where('ecosystem', 'php')->visible()->first();
+        });
         
-        $javascriptSkills = $javascriptSection ? 
-            SkillEcosystem::byEcosystem('javascript')->active()->ordered()->get() : collect();
-        $phpSkills = $phpSection ? 
-            SkillEcosystem::byEcosystem('php')->active()->ordered()->get() : collect();
+        $javascriptSkills = Cache::remember('skills.javascript', 3600, function () use ($javascriptSection) {
+            return $javascriptSection ? 
+                SkillEcosystem::byEcosystem('javascript')->active()->ordered()->get() : collect();
+        });
+        $phpSkills = Cache::remember('skills.php', 3600, function () use ($phpSection) {
+            return $phpSection ? 
+                SkillEcosystem::byEcosystem('php')->active()->ordered()->get() : collect();
+        });
         
         return view('portfolio.skills', compact('javascriptSection', 'phpSection', 'javascriptSkills', 'phpSkills'));
     }
@@ -73,16 +86,7 @@ class PortfolioController extends Controller
         return redirect()->back()->with('success', 'Message sent successfully!');
     }
 
-    public function downloadCV()
-    {
-        $filePath = public_path('cv/cv.pdf');
 
-        if (!file_exists($filePath)) {
-            return redirect()->back()->with('error', 'CV not found.');
-        }
-
-        return response()->download($filePath);
-    }
 
     private function trackVisit($page)
     {

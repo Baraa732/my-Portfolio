@@ -10,6 +10,8 @@
         rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/portfolio-animations.css') }}">
     <link rel="stylesheet" href="{{ asset('css/animations-fix.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/three-background.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
             --primary: #1a365d;
@@ -54,6 +56,12 @@
             /* min-height: 100vh; */
             overflow-x: hidden;
             font-weight: 400;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* Enhanced Container */
@@ -872,6 +880,9 @@
 </head>
 
 <body>
+    <!-- Three.js Canvas -->
+    <canvas id="three-canvas"></canvas>
+    
     <div class="loading-bar"></div>
 
     <nav class="navbar">
@@ -1099,9 +1110,24 @@
                 mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
             }
         });
+
+        // Disable text selection and copying
+        document.addEventListener('selectstart', e => e.preventDefault());
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey && (e.key === 'a' || e.key === 'c' || e.key === 'v' || e.key === 'x' || e.key === 's' || e.key === 'u')) {
+                e.preventDefault();
+            }
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                e.preventDefault();
+            }
+        });
     </script>
+    <script src="{{ asset('js/three-background.js') }}"></script>
     <script src="{{ asset('js/portfolio-animations.js') }}"></script>
     <script src="{{ asset('js/background-animations.js') }}"></script>
+    
+
 </body>
 
 </html>

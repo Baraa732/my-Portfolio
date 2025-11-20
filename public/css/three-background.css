@@ -1,0 +1,102 @@
+/* Three.js Background Styles */
+#three-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 50%, #16213e 100%);
+}
+
+/* Enhanced body background for fallback */
+body {
+    background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 50%, #16213e 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+/* Ensure content is above the 3D background */
+.container,
+.main-content,
+.portfolio-section,
+section {
+    position: relative;
+    z-index: 10;
+}
+
+/* Add subtle backdrop blur for better text readability */
+.hero-content,
+.section-content,
+.card,
+.project-card {
+    backdrop-filter: blur(2px);
+    background: rgba(15, 20, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+
+/* Performance optimizations */
+#three-canvas {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    #three-canvas {
+        /* Reduce complexity on mobile */
+        opacity: 0.7;
+    }
+    
+    .hero-content,
+    .section-content {
+        backdrop-filter: blur(1px);
+        background: rgba(15, 20, 25, 0.9);
+    }
+}
+
+/* High performance mode for low-end devices */
+@media (max-width: 480px), (prefers-reduced-motion: reduce) {
+    #three-canvas {
+        display: none;
+    }
+    
+    body {
+        background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 50%, #16213e 100%);
+        background-attachment: fixed;
+    }
+}
+
+/* WebGL not supported fallback */
+.webgl-not-supported {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 50%, #16213e 100%);
+    z-index: -1;
+}
+
+.webgl-not-supported::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(76, 111, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(26, 54, 93, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(96, 165, 250, 0.05) 0%, transparent 50%);
+    animation: backgroundFloat 20s ease-in-out infinite;
+}
+
+@keyframes backgroundFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-10px) rotate(1deg); }
+    66% { transform: translateY(5px) rotate(-1deg); }
+}

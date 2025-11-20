@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SkillEcosystem;
 use App\Models\EcosystemSection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class SkillEcosystemController extends Controller
 {
@@ -45,6 +46,7 @@ class SkillEcosystemController extends Controller
         ]);
 
         SkillEcosystem::create($request->all());
+        $this->clearSkillsCache();
 
         return response()->json(['success' => true, 'message' => 'Skill added successfully']);
     }
@@ -53,6 +55,7 @@ class SkillEcosystemController extends Controller
     {
         if ($request->has('toggle_status')) {
             $skill->update(['is_active' => !$skill->is_active]);
+            $this->clearSkillsCache();
             return response()->json([
                 'success' => true, 
                 'message' => $skill->is_active ? 'Skill activated' : 'Skill deactivated',
@@ -68,6 +71,7 @@ class SkillEcosystemController extends Controller
         ]);
 
         $skill->update($request->all());
+        $this->clearSkillsCache();
 
         return response()->json(['success' => true, 'message' => 'Skill updated successfully']);
     }
@@ -75,6 +79,7 @@ class SkillEcosystemController extends Controller
     public function destroy(SkillEcosystem $skill)
     {
         $skill->delete();
+        $this->clearSkillsCache();
         return response()->json(['success' => true, 'message' => 'Skill deleted successfully']);
     }
 
@@ -122,5 +127,15 @@ class SkillEcosystemController extends Controller
         );
 
         return response()->json(['success' => true, 'message' => 'Section updated successfully']);
+    }
+
+    private function clearSkillsCache()
+    {
+        Cache::forget('skills.javascript');
+        Cache::forget('skills.php');
+        Cache::forget('skills.home.javascript');
+        Cache::forget('skills.home.php');
+        Cache::forget('sections.javascript');
+        Cache::forget('sections.php');
     }
 }

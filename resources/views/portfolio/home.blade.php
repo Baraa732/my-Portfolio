@@ -64,7 +64,7 @@
                             <i class="fas fa-paper-plane"></i>
                             Start Project
                         </a>
-                        <a href="{{ route('download.cv') }}" class="btn btn-secondary">
+                        <a href="{{ route('download.cv') }}?v={{ time() }}" class="btn btn-secondary">
                             <i class="fas fa-download"></i>
                             Download CV
                         </a>
@@ -122,7 +122,7 @@
             display: flex;
             align-items: center;
             position: relative;
-            background: var(--gradient-dark);
+            /* background: var(--gradient-dark); */
             overflow: hidden;
             padding: 2rem 0;
         }
@@ -134,9 +134,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
+            z-index: -1;
             pointer-events: none;
             overflow: hidden;
+            opacity: 0.3;
         }
 
         /* Floating Shapes */
@@ -284,7 +285,8 @@
             background: linear-gradient(-45deg, var(--darker), var(--dark), var(--primary-dark), var(--secondary));
             background-size: 400% 400%;
             animation: gradientShift 15s ease infinite;
-            z-index: -1;
+            z-index: -3;
+            opacity: 0.2;
         }
 
         @keyframes gradientShift {
@@ -388,10 +390,10 @@
             width: 100%;
             height: 100%;
             background:
-                radial-gradient(circle at 20% 80%, rgba(76, 111, 255, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(26, 54, 93, 0.15) 0%, transparent 50%);
+                radial-gradient(circle at 20% 80%, rgba(76, 111, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(26, 54, 93, 0.05) 0%, transparent 50%);
             pointer-events: none;
-            z-index: 0;
+            z-index: -2;
             animation: backgroundPulse 8s ease-in-out infinite;
         }
 
@@ -402,7 +404,7 @@
             padding: 0 1.5rem;
             width: 100%;
             position: relative;
-            z-index: 3;
+            z-index: 10;
         }
 
         .home-content {
@@ -416,7 +418,7 @@
         /* === ENHANCED TEXT CONTENT === */
         .home-text {
             position: relative;
-            z-index: 3;
+            z-index: 15;
             animation: slideInLeft 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 

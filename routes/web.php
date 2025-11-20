@@ -22,7 +22,7 @@ Route::middleware(['rate.limit:120,1'])->group(function () {
     Route::get('/skills', [PortfolioController::class, 'skills'])->name('skills');
     Route::get('/projects', [PortfolioController::class, 'projects'])->name('projects');
     Route::get('/contact', [PortfolioController::class, 'contact'])->name('contact');
-    Route::get('/download-cv', [PortfolioController::class, 'downloadCV'])->name('download.cv');
+    Route::get('/download-cv', [\App\Http\Controllers\CVController::class, 'download'])->name('download.cv');
 });
 
 // Contact form with stricter rate limiting and sanitization
