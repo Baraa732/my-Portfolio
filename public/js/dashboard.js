@@ -205,24 +205,18 @@ function notificationComponent() {
 
 class AdminDashboard {
     constructor() {
-        this.initializeCounts();
         this.notificationSystem = new NotificationSystem();
         this.currentSection = 'dashboard';
 
-        // Fix base URL - use absolute path to avoid issues
-        const baseMeta = document.querySelector('meta[name="base-url"]');
-        this.baseUrl = baseMeta ? baseMeta.content : window.location.origin;
-
-        // Ensure it ends with /admin
-        if (!this.baseUrl.endsWith('/admin')) {
-            this.baseUrl += '/admin';
-        }
+        // Fix base URL - use window.location.origin + /admin
+        this.baseUrl = window.location.origin + '/admin';
 
         console.log('Admin Dashboard initialized with base URL:', this.baseUrl);
 
         this.formSubmitHandler = null;
         this.buttonClickHandler = null;
         this.init();
+        this.initializeCounts();
     }
 
     init() {
@@ -247,10 +241,13 @@ class AdminDashboard {
     bindEvents() {
         // Navigation - bind once
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.nav-link')) {
+            const navLink = e.target.closest('.nav-link');
+            if (navLink) {
                 e.preventDefault();
-                const link = e.target.closest('.nav-link');
-                this.switchSection(link.dataset.section);
+                const section = navLink.getAttribute('data-section');
+                if (section) {
+                    this.switchSection(section);
+                }
             }
         });
 
@@ -1570,18 +1567,29 @@ class AdminDashboard {
     // =====================
 
     async switchSection(section) {
+        if (!section) {
+            console.error('Section parameter is undefined');
+            return;
+        }
+        
         this.currentSection = section;
 
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('active');
         });
-        document.querySelector(`[data-section="${section}"]`).classList.add('active');
+        
+        const activeLink = document.querySelector(`[data-section="${section}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
 
-        document.getElementById('pageTitle').textContent =
-            section.charAt(0).toUpperCase() + section.slice(1);
+        const pageTitle = document.getElementById('pageTitle');
+        if (pageTitle) {
+            pageTitle.textContent = section.charAt(0).toUpperCase() + section.slice(1);
+        }
 
-        document.querySelectorAll('.section-content').forEach(section => {
-            section.classList.remove('active');
+        document.querySelectorAll('.section-content').forEach(sectionEl => {
+            sectionEl.classList.remove('active');
         });
 
         await this.loadSectionContent(section);
@@ -2147,24 +2155,812 @@ class AdminDashboard {
 
     async getSettingsContent() {
         return `
-            <section class="section-content">
-                <div class="section-card">
-                    <div class="card-header">
-                        <h3 class="card-title">Settings</h3>
+            <link rel="stylesheet" href="/css/settings.css">
+            <div class="settings-container">
+                <div class="settings-header">
+                    <h2><i class="fas fa-cog"></i> Advanced Settings</h2>
+                    <p>Configure and customize your portfolio website</p>
+                </div>
+                
+                <div class="settings-tabs">
+                    <button class="settings-tab active" data-tab="general">
+                        <i class="fas fa-home"></i> General
+                    </button>
+                    <button class="settings-tab" data-tab="security">
+                        <i class="fas fa-shield-alt"></i> Security
+                    </button>
+                    <button class="settings-tab" data-tab="email">
+                        <i class="fas fa-envelope"></i> Email
+                    </button>
+                    <button class="settings-tab" data-tab="backup">
+                        <i class="fas fa-database"></i> Backup
+                    </button>
+                </div>
+                
+                <div class="settings-content">
+                    <div id="settings-alert"></div>
+                    
+                    <div class="settings-section active" id="general-settings">
+                        <form class="settings-form" data-group="general">
+                            <div class="form-group">
+                                <label for="site_name"><i class="fas fa-globe"></i> Site Name *</label>
+                                <input type="text" id="site_name" name="site_name" class="form-control" value="Portfolio Website" required>
+                                <div class="help-text">The name of your portfolio website displayed in browser title</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="site_description"><i class="fas fa-align-left"></i> Site Description</label>
+                                <textarea id="site_description" name="site_description" class="form-control" rows="3" placeholder="Professional portfolio showcasing my work and skills"></textarea>
+                                <div class="help-text">Brief description for SEO meta tags and social media sharing</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="site_keywords"><i class="fas fa-tags"></i> SEO Keywords</label>
+                                <textarea id="site_keywords" name="site_keywords" class="form-control" rows="2" placeholder="portfolio, web developer, designer, projects"></textarea>
+                                <div class="help-text">Comma-separated keywords to improve search engine visibility</div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="timezone"><i class="fas fa-clock"></i> Timezone *</label>
+                                    <select id="timezone" name="timezone" class="form-control select-control" required>
+                                        <option value="UTC">UTC (Coordinated Universal Time)</option>
+                                        <option value="America/New_York">Eastern Time (New York)</option>
+                                        <option value="America/Chicago">Central Time (Chicago)</option>
+                                        <option value="America/Denver">Mountain Time (Denver)</option>
+                                        <option value="America/Los_Angeles">Pacific Time (Los Angeles)</option>
+                                        <option value="Europe/London">London (GMT)</option>
+                                        <option value="Europe/Paris">Paris (CET)</option>
+                                        <option value="Asia/Tokyo">Tokyo (JST)</option>
+                                        <option value="Asia/Dubai">Dubai (GST)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="maintenance_mode" name="maintenance_mode">
+                                        <label for="maintenance_mode"><i class="fas fa-tools"></i> Maintenance Mode</label>
+                                    </div>
+                                    <div class="help-text">Show maintenance page to visitors while updating site</div>
+                                </div>
+                            </div>
+                            
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSettings()">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="card-body">
-                        <p>Settings management will be implemented soon.</p>
+                    
+                    <div class="settings-section" id="security-settings">
+                        <form class="settings-form" data-group="security">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="session_timeout"><i class="fas fa-hourglass-half"></i> Session Timeout (minutes) *</label>
+                                    <input type="number" id="session_timeout" name="session_timeout" class="form-control" min="5" max="1440" value="30" required>
+                                    <div class="help-text">Automatically logout admin after inactivity (5-1440 minutes)</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="max_login_attempts"><i class="fas fa-lock"></i> Max Login Attempts *</label>
+                                    <input type="number" id="max_login_attempts" name="max_login_attempts" class="form-control" min="3" max="10" value="5" required>
+                                    <div class="help-text">Lock account after failed login attempts (3-10)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password_expiry_days"><i class="fas fa-key"></i> Password Expiry (days)</label>
+                                <input type="number" id="password_expiry_days" name="password_expiry_days" class="form-control" min="30" max="365" placeholder="90">
+                                <div class="help-text">Force password change after specified days (30-365, leave empty for never)</div>
+                            </div>
+                            
+                            <div class="form-group super-admin-section">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="two_factor_enabled" name="two_factor_enabled">
+                                    <label for="two_factor_enabled"><i class="fas fa-mobile-alt"></i> Two-Factor Authentication</label>
+                                    <span class="permission-badge"><i class="fas fa-crown"></i> Super Admin</span>
+                                </div>
+                                <div class="help-text">Require SMS or app-based 2FA for enhanced security</div>
+                            </div>
+                            
+                            <div class="form-group super-admin-section">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="force_https" name="force_https">
+                                    <label for="force_https"><i class="fas fa-certificate"></i> Force HTTPS</label>
+                                    <span class="permission-badge"><i class="fas fa-crown"></i> Super Admin</span>
+                                </div>
+                                <div class="help-text">Automatically redirect all HTTP requests to HTTPS</div>
+                            </div>
+                            
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-shield-alt"></i> Save Security Settings
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSettings()">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="settings-section" id="email-settings">
+                        <form class="settings-form" data-group="email">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="smtp_host"><i class="fas fa-server"></i> SMTP Host</label>
+                                    <input type="text" id="smtp_host" name="smtp_host" class="form-control" placeholder="smtp.gmail.com">
+                                    <div class="help-text">Your email provider's SMTP server address</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="smtp_port"><i class="fas fa-plug"></i> SMTP Port</label>
+                                    <input type="number" id="smtp_port" name="smtp_port" class="form-control" placeholder="587" min="1" max="65535">
+                                    <div class="help-text">Usually 587 for TLS or 465 for SSL</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="smtp_username"><i class="fas fa-user"></i> SMTP Username</label>
+                                    <input type="text" id="smtp_username" name="smtp_username" class="form-control" placeholder="your-email@gmail.com">
+                                    <div class="help-text">Your email address for SMTP authentication</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="smtp_password"><i class="fas fa-eye-slash"></i> SMTP Password</label>
+                                    <input type="password" id="smtp_password" name="smtp_password" class="form-control" placeholder="Leave blank to keep current">
+                                    <div class="help-text">App password or account password (encrypted storage)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="mail_from_address"><i class="fas fa-at"></i> From Email Address</label>
+                                    <input type="email" id="mail_from_address" name="mail_from_address" class="form-control" placeholder="noreply@yoursite.com">
+                                    <div class="help-text">Email address shown as sender in outgoing emails</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="mail_from_name"><i class="fas fa-signature"></i> From Name</label>
+                                    <input type="text" id="mail_from_name" name="mail_from_name" class="form-control" placeholder="Your Portfolio">
+                                    <div class="help-text">Display name for outgoing emails</div>
+                                </div>
+                            </div>
+                            
+                            <div class="test-email-section">
+                                <h4><i class="fas fa-paper-plane"></i> Test Email Configuration</h4>
+                                <p>Send a test email to verify your SMTP settings are working correctly.</p>
+                                <div class="input-group">
+                                    <input type="email" id="test_email" class="form-control" placeholder="Enter email address to test">
+                                    <button type="button" class="btn btn-success" onclick="testEmail()">
+                                        <i class="fas fa-paper-plane"></i> Send Test Email
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-envelope"></i> Save Email Settings
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSettings()">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="settings-section" id="backup-settings">
+                        <form class="settings-form" data-group="backup">
+                            <div class="form-group super-admin-section">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="auto_backup_enabled" name="auto_backup_enabled">
+                                    <label for="auto_backup_enabled"><i class="fas fa-robot"></i> Enable Automatic Backups</label>
+                                    <span class="permission-badge"><i class="fas fa-crown"></i> Super Admin</span>
+                                </div>
+                                <div class="help-text">Automatically backup database and files on schedule</div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="backup_frequency"><i class="fas fa-calendar-alt"></i> Backup Frequency</label>
+                                    <select id="backup_frequency" name="backup_frequency" class="form-control select-control">
+                                        <option value="">Select backup frequency</option>
+                                        <option value="daily">Daily (Recommended)</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                    </select>
+                                    <div class="help-text">How often to create automatic backups</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="backup_retention_days"><i class="fas fa-history"></i> Retention Period (days)</label>
+                                    <input type="number" id="backup_retention_days" name="backup_retention_days" class="form-control" min="1" max="365" placeholder="30">
+                                    <div class="help-text">How long to keep backup files (1-365 days)</div>
+                                </div>
+                            </div>
+                            
+                            <div style="background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); padding: 2rem; border-radius: 16px; margin: 2rem 0; border: 2px solid #fc8181;">
+                                <h4 style="color: #742a2a; margin: 0 0 1rem;"><i class="fas fa-exclamation-triangle"></i> Manual Backup</h4>
+                                <p style="color: #742a2a; margin: 0 0 1rem;">Create an immediate backup of your database and files. This may take a few minutes.</p>
+                                <button type="button" class="btn btn-success" onclick="createBackup()" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+                                    <i class="fas fa-download"></i> Create Backup Now
+                                </button>
+                            </div>
+                            
+                            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 2rem; border-radius: 16px; margin: 2rem 0; border: 2px solid #0ea5e9;">
+                                <h4 style="color: #0c4a6e; margin: 0 0 1rem;"><i class="fas fa-archive"></i> Existing Backups</h4>
+                                <p style="color: #0c4a6e; margin: 0 0 1rem;">Manage your existing backup files. Click refresh to update the list.</p>
+                                <div style="margin-bottom: 1rem;">
+                                    <button type="button" class="btn btn-primary" onclick="loadBackupsList()" style="margin-right: 1rem;">
+                                        <i class="fas fa-sync-alt"></i> Refresh List
+                                    </button>
+                                </div>
+                                <div id="backups-list" style="margin-top: 1rem;">
+                                    <div class="loading-text">Click refresh to load backups...</div>
+                                </div>
+                            </div>
+                            
+                            <style>
+                            .backups-grid {
+                                display: grid;
+                                gap: 1rem;
+                                margin-top: 1rem;
+                            }
+                            .backup-item {
+                                background: rgba(255, 255, 255, 0.1);
+                                border: 1px solid rgba(255, 255, 255, 0.2);
+                                border-radius: 8px;
+                                padding: 1rem;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                            }
+                            .backup-info h5 {
+                                margin: 0 0 0.5rem 0;
+                                color: var(--light);
+                            }
+                            .backup-details {
+                                display: flex;
+                                gap: 1rem;
+                                margin-bottom: 0.5rem;
+                                font-size: 0.9rem;
+                                color: var(--gray);
+                            }
+                            .backup-files {
+                                display: flex;
+                                gap: 0.5rem;
+                            }
+                            .file-badge {
+                                padding: 0.2rem 0.5rem;
+                                border-radius: 4px;
+                                font-size: 0.8rem;
+                                font-weight: 500;
+                            }
+                            .file-badge.database {
+                                background: rgba(34, 197, 94, 0.2);
+                                color: #22c55e;
+                                border: 1px solid rgba(34, 197, 94, 0.3);
+                            }
+                            .file-badge.files {
+                                background: rgba(59, 130, 246, 0.2);
+                                color: #3b82f6;
+                                border: 1px solid rgba(59, 130, 246, 0.3);
+                            }
+                            .no-backups, .error-text, .loading-text {
+                                text-align: center;
+                                padding: 2rem;
+                                color: var(--gray);
+                            }
+                            .error-text {
+                                color: var(--danger);
+                            }
+                            </style>
+                            
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-database"></i> Save Backup Settings
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSettings()">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            </section>
+            </div>
         `;
     }
+}
+
+// Settings functionality
+let currentSettings = {};
+let userPermissions = {};
+
+function initializeSettings() {
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('settings-tab')) {
+            const tabName = e.target.dataset.tab;
+            switchSettingsTab(tabName);
+        }
+    });
+
+    document.addEventListener('submit', function(e) {
+        if (e.target.classList.contains('settings-form')) {
+            e.preventDefault();
+            saveSettings(e.target);
+        }
+    });
+
+    loadSettings();
+}
+
+function switchSettingsTab(tabName) {
+    document.querySelectorAll('.settings-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+    document.querySelectorAll('.settings-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.getElementById(`${tabName}-settings`).classList.add('active');
+}
+
+function loadSettings() {
+    showAlert('Loading settings...', 'info');
+    
+    fetch('/admin/settings', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            currentSettings = data.settings || {};
+            userPermissions = data.user_permissions || {};
+            populateSettingsForm();
+            updatePermissions();
+            showAlert('Settings loaded successfully', 'success');
+        } else {
+            throw new Error(data.message || 'Failed to load settings');
+        }
+    })
+    .catch(error => {
+        console.error('Settings load error:', error);
+        showAlert('Error loading settings: ' + error.message, 'error');
+        // Load default values on error
+        loadDefaultSettings();
+    });
+}
+
+function loadDefaultSettings() {
+    // Set default values when loading fails
+    document.getElementById('site_name').value = 'Portfolio Website';
+    document.getElementById('site_description').value = 'Professional Portfolio';
+    document.getElementById('timezone').value = 'UTC';
+    document.getElementById('session_timeout').value = '30';
+    document.getElementById('max_login_attempts').value = '5';
+}
+
+function populateSettingsForm() {
+    Object.keys(currentSettings).forEach(group => {
+        Object.keys(currentSettings[group]).forEach(key => {
+            const element = document.getElementById(key);
+            if (element) {
+                const value = currentSettings[group][key].value;
+                if (element.type === 'checkbox') {
+                    element.checked = Boolean(value);
+                } else {
+                    element.value = value || '';
+                }
+            }
+        });
+    });
+}
+
+function updatePermissions() {
+    const superAdminSections = document.querySelectorAll('.super-admin-section');
+    superAdminSections.forEach(section => {
+        if (!userPermissions.is_super_admin) {
+            section.classList.add('super-admin-only');
+            const inputs = section.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => input.disabled = true);
+        }
+    });
+}
+
+function saveSettings(form) {
+    const group = form.dataset.group;
+    const formData = new FormData(form);
+    const settings = {};
+
+    // Clear previous errors
+    clearFormErrors(form);
+
+    // Process form data with proper type conversion
+    for (let [key, value] of formData.entries()) {
+        const element = form.querySelector(`[name="${key}"]`);
+        if (element.type === 'checkbox') {
+            settings[key] = element.checked;
+        } else if (element.type === 'number') {
+            const numValue = parseInt(value);
+            settings[key] = isNaN(numValue) ? 0 : numValue;
+        } else {
+            settings[key] = value.trim();
+        }
+    }
+
+    // Handle unchecked checkboxes
+    form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        if (!formData.has(checkbox.name)) {
+            settings[checkbox.name] = false;
+        }
+    });
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="loading"></span> Saving...';
+    submitBtn.disabled = true;
+
+    fetch('/admin/settings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ group, settings })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message || 'Settings saved successfully!', 'success');
+            // Add success animation
+            form.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                form.style.transform = 'scale(1)';
+            }, 200);
+            loadSettings();
+        } else {
+            showAlert(data.message || 'Failed to save settings', 'error');
+            if (data.errors) {
+                displayValidationErrors(form, data.errors);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Settings save error:', error);
+        showAlert('Network error: ' + error.message, 'error');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+function clearFormErrors(form) {
+    form.querySelectorAll('.error-message').forEach(el => el.remove());
+    form.querySelectorAll('.form-control.error').forEach(el => el.classList.remove('error'));
+}
+
+function testEmail() {
+    const emailInput = document.getElementById('test_email');
+    const email = emailInput.value.trim();
+    
+    if (!email) {
+        showAlert('Please enter a valid email address', 'error');
+        emailInput.focus();
+        return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showAlert('Please enter a valid email format', 'error');
+        emailInput.focus();
+        return;
+    }
+
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="loading"></span> Sending...';
+    btn.disabled = true;
+
+    fetch('/admin/settings/test-email', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showAlert('✅ ' + (data.message || 'Test email sent successfully!'), 'success');
+            emailInput.value = '';
+            // Add success animation
+            btn.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1)';
+            }, 200);
+        } else {
+            showAlert('❌ ' + (data.message || 'Failed to send test email'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Test email error:', error);
+        showAlert('❌ Network error: ' + error.message, 'error');
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
+
+function createBackup() {
+    if (!confirm('Create a backup now? This may take a few minutes and will include your database and files.')) {
+        return;
+    }
+
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="loading"></span> Creating Backup...';
+    btn.disabled = true;
+
+    fetch('/admin/settings/backup/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showAlert('🎉 ' + (data.message || 'Backup created successfully!'), 'success');
+            // Add success animation
+            btn.style.transform = 'scale(1.1)';
+            btn.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1)';
+            }, 300);
+            // Refresh backup list if visible
+            loadBackupsList();
+        } else {
+            showAlert('❌ ' + (data.message || 'Failed to create backup'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Backup creation error:', error);
+        showAlert('❌ Network error: ' + error.message, 'error');
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
+
+function loadBackupsList() {
+    const backupsContainer = document.getElementById('backups-list');
+    if (!backupsContainer) return;
+    
+    backupsContainer.innerHTML = '<div class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading backups...</div>';
+    
+    fetch('/admin/settings/backup/list', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            if (data.backups && data.backups.length > 0) {
+                let html = '<div class="backups-grid">';
+                data.backups.forEach(backup => {
+                    html += `
+                        <div class="backup-item">
+                            <div class="backup-info">
+                                <h5><i class="fas fa-archive"></i> ${backup.name}</h5>
+                                <div class="backup-details">
+                                    <span class="backup-date"><i class="fas fa-calendar"></i> ${backup.date}</span>
+                                    <span class="backup-size"><i class="fas fa-hdd"></i> ${backup.size}</span>
+                                </div>
+                                <div class="backup-files">
+                                    ${backup.files.database ? '<span class="file-badge database"><i class="fas fa-database"></i> Database</span>' : ''}
+                                    ${backup.files.files ? '<span class="file-badge files"><i class="fas fa-folder"></i> Files</span>' : ''}
+                                </div>
+                            </div>
+                            <div class="backup-actions">
+                                <button class="btn btn-info btn-sm" onclick="restoreBackup('${backup.name}', 'database')" title="Restore database" style="margin-right: 0.5rem;">
+                                    <i class="fas fa-database"></i>
+                                </button>
+                                <button class="btn btn-warning btn-sm" onclick="restoreBackup('${backup.name}', 'files')" title="Restore files" style="margin-right: 0.5rem;">
+                                    <i class="fas fa-folder"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteBackup('${backup.name}')" title="Delete backup">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                backupsContainer.innerHTML = html;
+            } else {
+                backupsContainer.innerHTML = '<div class="no-backups"><i class="fas fa-info-circle"></i> No backups found. Create your first backup above.</div>';
+            }
+        } else {
+            throw new Error(data.message || 'Failed to load backups');
+        }
+    })
+    .catch(error => {
+        console.error('Load backups error:', error);
+        backupsContainer.innerHTML = `<div class="error-text"><i class="fas fa-exclamation-triangle"></i> Error: ${error.message}</div>`;
+    });
+}
+
+function restoreBackup(backupName, type) {
+    const typeText = type === 'database' ? 'database' : 'files';
+    if (!confirm(`⚠️ DANGER: This will restore the ${typeText} from backup "${backupName}" and OVERWRITE current data. This cannot be undone. Continue?`)) {
+        return;
+    }
+    
+    fetch(`/admin/settings/backup/${backupName}/restore`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ type })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showAlert('✅ ' + (data.message || 'Backup restored successfully'), 'success');
+            if (type === 'database') {
+                showAlert('🔄 Please refresh the page to see restored data', 'info');
+            }
+        } else {
+            showAlert('❌ ' + (data.message || 'Failed to restore backup'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Restore backup error:', error);
+        showAlert('❌ Network error: ' + error.message, 'error');
+    });
+}
+
+function deleteBackup(backupName) {
+    if (!confirm(`Are you sure you want to delete backup "${backupName}"? This action cannot be undone.`)) {
+        return;
+    }
+    
+    fetch(`/admin/settings/backup/${backupName}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showAlert('✅ ' + (data.message || 'Backup deleted successfully'), 'success');
+            loadBackupsList(); // Refresh the list
+        } else {
+            showAlert('❌ ' + (data.message || 'Failed to delete backup'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Delete backup error:', error);
+        showAlert('❌ Network error: ' + error.message, 'error');
+    });
+}
+
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('settings-alert');
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+    
+    alertContainer.innerHTML = `
+        <div class="alert ${alertClass}">
+            ${message}
+        </div>
+    `;
+
+    setTimeout(() => {
+        alertContainer.innerHTML = '';
+    }, 5000);
+}
+
+function displayValidationErrors(form, errors) {
+    form.querySelectorAll('.error-message').forEach(el => el.remove());
+    form.querySelectorAll('.form-control.error').forEach(el => el.classList.remove('error'));
+
+    Object.keys(errors).forEach(field => {
+        const fieldName = field.replace('settings.', '');
+        const element = form.querySelector(`[name="${fieldName}"]`);
+        if (element) {
+            element.classList.add('error');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = errors[field][0];
+            element.parentNode.appendChild(errorDiv);
+        }
+    });
 }
 
 // Initialize the dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.adminDashboard = new AdminDashboard();
     console.log('Admin Dashboard initialized successfully');
+    
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                const settingsContainer = document.querySelector('.settings-container');
+                if (settingsContainer) {
+                    initializeSettings();
+                    observer.disconnect();
+                }
+            }
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 });
 
 // Initialize Alpine.js notification component

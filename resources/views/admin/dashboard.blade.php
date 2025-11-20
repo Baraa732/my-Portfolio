@@ -83,8 +83,8 @@
                                 <span>Profile</span>
                             </a></li>
                         <li><a href="#" class="nav-link" data-section="settings">
-                                <i class="nav-icon fas fa-cog"></i>
-                                <span>Settings</span>
+                                <i class="nav-icon fas fa-cogs"></i>
+                                <span>Advanced Settings</span>
                             </a></li>
                     </ul>
                 </div>

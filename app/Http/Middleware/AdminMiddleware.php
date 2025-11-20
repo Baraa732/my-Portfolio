@@ -45,13 +45,6 @@ class AdminMiddleware
         if (!$request->session()->has('admin_verified')) {
             $request->session()->put('admin_verified', true);
         }
-        
-        // Regenerate session ID periodically for security
-        if (!$request->session()->has('last_regenerated') || 
-            $request->session()->get('last_regenerated') < now()->subMinutes(30)->timestamp) {
-            $request->session()->regenerate();
-            $request->session()->put('last_regenerated', now()->timestamp);
-        }
 
         return $next($request);
     }

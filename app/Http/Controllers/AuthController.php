@@ -82,12 +82,10 @@ class AuthController extends Controller
                 ]);
             }
             
-            // Regenerate session ID to prevent session fixation
-            $request->session()->regenerate();
+            // Session fixation prevention removed to fix session expiry issues
             
             // Set admin verification flag
             $request->session()->put('admin_verified', true);
-            $request->session()->put('last_regenerated', now()->timestamp);
             
             // Log successful login with more details
             \Log::info('Admin login successful', [

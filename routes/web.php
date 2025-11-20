@@ -9,6 +9,7 @@ use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 // =====================
 // MAIN FRONTEND ROUTES
@@ -33,25 +34,16 @@ Route::post('/contact', [ContactController::class, 'submit'])
 // AUTH ROUTES
 // =====================
 
-// Auth routes with enhanced security
-Route::middleware(['rate.limit:10,5'])->group(function () {
-    Route::get('/admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('/admin/login', [AuthController::class, 'login'])
-        ->middleware(['throttle.login', 'sanitize'])
-        ->name('admin.login.submit');
-    Route::post('/login', [AuthController::class, 'login'])
-        ->middleware(['throttle.login', 'sanitize'])
-        ->name('login');
-});
+// Auth routes
+Route::get('/admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
+Route::post('/admin/login', [AuthController::class, 'login'])->name('admin.login.submit');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware(['auth', 'admin'])
     ->name('logout');
 
-// CSRF token refresh route (accessible without authentication)
-Route::get('/admin/csrf-token', function() {
-    return response()->json(['token' => csrf_token()]);
-});
+
 
 // Redirect /admin to login if not authenticated
 Route::get('/admin', function () {
@@ -110,6 +102,17 @@ Route::middleware(['admin', 'rate.limit:300,1', 'sanitize'])->prefix('admin')->n
     
     // Analytics
     Route::get('/analytics', [AdminController::class, 'getAnalytics'])->name('analytics');
+    
+    // Settings
+    Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [\App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/settings/test-email', [\App\Http\Controllers\SettingsController::class, 'testEmail'])->name('settings.test-email');
+    
+    // Backup routes
+    Route::post('/settings/backup/create', [\App\Http\Controllers\SettingsController::class, 'createBackup'])->name('settings.backup.create');
+    Route::get('/settings/backup/list', [\App\Http\Controllers\SettingsController::class, 'listBackups'])->name('settings.backup.list');
+    Route::delete('/settings/backup/{backupName}', [\App\Http\Controllers\SettingsController::class, 'deleteBackup'])->name('settings.backup.delete');
+    Route::post('/settings/backup/{backupName}/restore', [\App\Http\Controllers\SettingsController::class, 'restoreBackup'])->name('settings.backup.restore');
 });
 
 Route::get('/blog', function () {

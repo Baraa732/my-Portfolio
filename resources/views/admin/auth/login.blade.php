@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - Baraa Al-Rifaee</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -45,7 +45,7 @@
             </div>
 
             <!-- Login Form -->
-            <form class="login-form" method="POST" action="{{ route('login') }}" 
+            <form class="login-form" method="POST" action="{{ route('admin.login.submit') }}" 
                   autocomplete="off" novalidate data-lpignore="true">
                 @csrf
                 
@@ -91,11 +91,7 @@
                     </label>
                 </div>
 
-                <!-- Enhanced Honeypot -->
-                <input type="text" name="website" style="display: none !important; position: absolute !important; left: -9999px !important;" 
-                       tabindex="-1" autocomplete="off" aria-hidden="true">
-                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="timestamp" value="{{ time() }}">
+
 
                 <!-- Submit Button -->
                 <button type="submit" class="login-btn">

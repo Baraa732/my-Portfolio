@@ -29,7 +29,7 @@ class SecurityHeaders
                "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; " .
                "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " .
                "img-src 'self' data: https:; " .
-               "connect-src 'self'; " .
+               "connect-src 'self' https://cdn.jsdelivr.net; " .
                "frame-ancestors 'none'; " .
                "base-uri 'self'; " .
                "form-action 'self'";
