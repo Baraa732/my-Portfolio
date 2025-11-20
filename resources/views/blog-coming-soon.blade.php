@@ -8,6 +8,9 @@
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet">
+   <script src="https://unpkg.com/@splinetool/runtime@1.0.47/build/runtime.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
    <style>
       :root {
          --background: #ebe2d5;
@@ -54,6 +57,43 @@
          padding: 2rem;
          position: relative;
          overflow: hidden;
+      }
+
+      #spline-canvas {
+         position: fixed;
+         top: 0;
+         left: 0;
+         width: 100%;
+         height: 100%;
+         z-index: 0;
+         pointer-events: none;
+      }
+
+      .modern-3d-container {
+         position: fixed;
+         top: 0;
+         left: 0;
+         width: 100%;
+         height: 100%;
+         z-index: 0;
+         pointer-events: none;
+         overflow: hidden;
+      }
+
+      .floating-sphere {
+         position: absolute;
+         border-radius: 50%;
+         background: radial-gradient(circle at 30% 30%, rgba(196, 74, 76, 0.8), rgba(115, 12, 14, 0.4));
+         filter: blur(1px);
+         animation: modernFloat 8s ease-in-out infinite;
+      }
+
+      .morphing-blob {
+         position: absolute;
+         background: linear-gradient(45deg, #730c0e, #c44a4c, #480415);
+         border-radius: 50%;
+         filter: blur(2px);
+         animation: morphBlob 12s ease-in-out infinite;
       }
 
       .background-animation {
@@ -355,19 +395,37 @@
       }
 
       /* Animations */
-      @keyframes float {
-
-         0%,
-         100% {
-            transform: translateY(0) rotate(0deg);
+      @keyframes modernFloat {
+         0%, 100% {
+            transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
          }
-
-         33% {
-            transform: translateY(-20px) rotate(2deg);
+         25% {
+            transform: translate3d(20px, -30px, 0) scale(1.1) rotate(90deg);
          }
+         50% {
+            transform: translate3d(-10px, -60px, 0) scale(0.9) rotate(180deg);
+         }
+         75% {
+            transform: translate3d(-30px, -30px, 0) scale(1.05) rotate(270deg);
+         }
+      }
 
-         66% {
-            transform: translateY(-10px) rotate(-2deg);
+      @keyframes morphBlob {
+         0%, 100% {
+            border-radius: 50% 40% 60% 30%;
+            transform: rotate(0deg) scale(1);
+         }
+         25% {
+            border-radius: 30% 60% 40% 70%;
+            transform: rotate(90deg) scale(1.2);
+         }
+         50% {
+            border-radius: 70% 30% 50% 60%;
+            transform: rotate(180deg) scale(0.8);
+         }
+         75% {
+            border-radius: 40% 70% 30% 50%;
+            transform: rotate(270deg) scale(1.1);
          }
       }
 
@@ -469,6 +527,11 @@
 </head>
 
 <body>
+   <!-- Modern 3D Background -->
+   <div class="modern-3d-container" id="modern3d">
+      <canvas id="spline-canvas"></canvas>
+   </div>
+   
    <div class="coming-soon-container">
       <!-- Background Animation -->
       <div class="background-animation">
@@ -518,12 +581,19 @@
       </div>
    </div>
 
+   <script src="{{ asset('js/modern-3d-blog.js') }}"></script>
    <script>
-      // Add fade-in animation to elements
+      // Initialize fade-in animations
       document.addEventListener('DOMContentLoaded', function () {
          const elements = document.querySelectorAll('.coming-soon-card, .logo, .back-home');
          elements.forEach((element, index) => {
-            element.style.animation = `fadeInUp 0.8s ease-out ${index * 0.2}s both`;
+            gsap.from(element, {
+               y: 50,
+               opacity: 0,
+               duration: 1,
+               delay: index * 0.2,
+               ease: "power3.out"
+            });
          });
       });
    </script>

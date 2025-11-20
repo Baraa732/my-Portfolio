@@ -1125,7 +1125,6 @@
     </script>
     <script src="{{ asset('js/three-background.js') }}"></script>
     <script src="{{ asset('js/portfolio-animations.js') }}"></script>
-    <script src="{{ asset('js/background-animations.js') }}"></script>
     
 
 </body>
