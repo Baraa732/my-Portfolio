@@ -23,6 +23,7 @@ Route::middleware(['rate.limit:120,1'])->group(function () {
     Route::get('/projects', [PortfolioController::class, 'projects'])->name('projects');
     Route::get('/contact', [PortfolioController::class, 'contact'])->name('contact');
     Route::get('/download-cv', [\App\Http\Controllers\CVController::class, 'download'])->name('download.cv');
+    Route::get('/api/project-categories', [\App\Http\Controllers\ProjectCategoryController::class, 'getVisible'])->name('api.categories');
 });
 
 // Contact form with stricter rate limiting and sanitization
@@ -67,6 +68,13 @@ Route::middleware(['admin', 'rate.limit:300,1', 'sanitize'])->prefix('admin')->n
     Route::get('/projects/{id}', [ProjectController::class, 'show'])->name('projects.show');
     Route::put('/projects/{id}', [ProjectController::class, 'update'])->name('projects.update');
     Route::delete('/projects/{id}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+
+    // Project Categories
+    Route::get('/project-categories', [\App\Http\Controllers\ProjectCategoryController::class, 'index'])->name('categories.index');
+    Route::post('/project-categories', [\App\Http\Controllers\ProjectCategoryController::class, 'store'])->name('categories.store');
+    Route::put('/project-categories/{id}', [\App\Http\Controllers\ProjectCategoryController::class, 'update'])->name('categories.update');
+    Route::post('/project-categories/{id}/toggle', [\App\Http\Controllers\ProjectCategoryController::class, 'toggleVisibility'])->name('categories.toggle');
+    Route::delete('/project-categories/{id}', [\App\Http\Controllers\ProjectCategoryController::class, 'destroy'])->name('categories.destroy');
 
     // Sections routes - make sure these exist
     Route::get('/sections', [AdminController::class, 'getSections'])->name('sections.index');

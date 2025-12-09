@@ -59,11 +59,14 @@ class ProjectController extends Controller
         }
 
         try {
-            $data = $request->only(['title', 'description', 'technologies', 'project_url', 'github_url', 'is_active', 'order']);
+            $data = $request->only(['title', 'description', 'technologies', 'project_url', 'github_url', 'order']);
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
             if ($request->hasFile('image')) {
-                $data['image'] = $request->file('image')->store('projects', 'public');
+                $image = $request->file('image');
+                $imagePath = $image->store('projects', 'public');
+                $data['image'] = $imagePath;
+                \Log::info('Image uploaded in ProjectController: ' . $imagePath);
             }
 
             $project = Project::create($data);
@@ -75,6 +78,7 @@ class ProjectController extends Controller
                 'project' => $project
             ]);
         } catch (\Exception $e) {
+            \Log::error('Project creation error in ProjectController: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create project: ' . $e->getMessage()
@@ -110,7 +114,6 @@ class ProjectController extends Controller
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
             if ($request->hasFile('image')) {
-                // Delete old image
                 if ($project->image && Storage::exists('public/' . $project->image)) {
                     Storage::delete('public/' . $project->image);
                 }
@@ -140,12 +143,11 @@ class ProjectController extends Controller
 
             if (!$project) {
                 return response()->json([
-                    'success' => true, // Return success even if not found (already deleted)
+                    'success' => true,
                     'message' => 'Project was already deleted or not found'
                 ]);
             }
 
-            // Delete image if exists
             if ($project->image && Storage::exists('public/' . $project->image)) {
                 Storage::delete('public/' . $project->image);
             }
@@ -160,7 +162,6 @@ class ProjectController extends Controller
             ]);
         } catch (\Exception $e) {
             \Log::error('Project deletion error: ' . $e->getMessage());
-
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete project: ' . $e->getMessage()

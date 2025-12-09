@@ -4,7 +4,8 @@
     --accent: #4c6fff;
     --dark: #0f1419;
     --light: #ffffff;
-    --gradient: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    /* --gradient: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); */
+    --gradient: linear-gradient(135deg, #ffffff 0%, var(--accent) 60%)
 }
 
 /* Base Animation Classes */
@@ -151,12 +152,29 @@
 }
 
 /* Stagger Animation */
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
-.stagger-4 { animation-delay: 0.4s; }
-.stagger-5 { animation-delay: 0.5s; }
-.stagger-6 { animation-delay: 0.6s; }
+.stagger-1 {
+    animation-delay: 0.1s;
+}
+
+.stagger-2 {
+    animation-delay: 0.2s;
+}
+
+.stagger-3 {
+    animation-delay: 0.3s;
+}
+
+.stagger-4 {
+    animation-delay: 0.4s;
+}
+
+.stagger-5 {
+    animation-delay: 0.5s;
+}
+
+.stagger-6 {
+    animation-delay: 0.6s;
+}
 
 /* Page Transition */
 body {
@@ -292,14 +310,45 @@ body {
     animation: particleFloat 25s infinite linear;
 }
 
-.bg-particle:nth-child(1) { left: 10%; animation-delay: 0s; }
-.bg-particle:nth-child(2) { left: 20%; animation-delay: -5s; }
-.bg-particle:nth-child(3) { left: 30%; animation-delay: -10s; }
-.bg-particle:nth-child(4) { left: 40%; animation-delay: -15s; }
-.bg-particle:nth-child(5) { left: 50%; animation-delay: -20s; }
-.bg-particle:nth-child(6) { left: 60%; animation-delay: -25s; }
-.bg-particle:nth-child(7) { left: 70%; animation-delay: -30s; }
-.bg-particle:nth-child(8) { left: 80%; animation-delay: -35s; }
+.bg-particle:nth-child(1) {
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.bg-particle:nth-child(2) {
+    left: 20%;
+    animation-delay: -5s;
+}
+
+.bg-particle:nth-child(3) {
+    left: 30%;
+    animation-delay: -10s;
+}
+
+.bg-particle:nth-child(4) {
+    left: 40%;
+    animation-delay: -15s;
+}
+
+.bg-particle:nth-child(5) {
+    left: 50%;
+    animation-delay: -20s;
+}
+
+.bg-particle:nth-child(6) {
+    left: 60%;
+    animation-delay: -25s;
+}
+
+.bg-particle:nth-child(7) {
+    left: 70%;
+    animation-delay: -30s;
+}
+
+.bg-particle:nth-child(8) {
+    left: 80%;
+    animation-delay: -35s;
+}
 
 /* Rotating Lines */
 .bg-lines {
@@ -343,6 +392,7 @@ body {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -354,6 +404,7 @@ body {
         opacity: 0;
         transform: translateX(-30px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -365,6 +416,7 @@ body {
         opacity: 0;
         transform: translateX(30px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -376,6 +428,7 @@ body {
         opacity: 0;
         transform: scale(0.8);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -387,6 +440,7 @@ body {
         opacity: 0;
         transform: rotate(-180deg) scale(0.8);
     }
+
     to {
         opacity: 1;
         transform: rotate(0deg) scale(1);
@@ -394,23 +448,49 @@ body {
 }
 
 @keyframes typing {
-    from { width: 0; }
-    to { width: 100%; }
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100%;
+    }
 }
 
 @keyframes blink-caret {
-    from, to { border-color: transparent; }
-    50% { border-color: #4c6fff; }
+
+    from,
+    to {
+        border-color: transparent;
+    }
+
+    50% {
+        border-color: #4c6fff;
+    }
 }
 
 @keyframes floating {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
 }
 
 @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
 }
 
 @keyframes slideInBottom {
@@ -418,6 +498,7 @@ body {
         opacity: 0;
         transform: translateY(100px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -429,6 +510,7 @@ body {
         opacity: 0;
         transform: translateY(-100px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -440,13 +522,16 @@ body {
         opacity: 0;
         transform: scale(0.3);
     }
+
     50% {
         opacity: 1;
         transform: scale(1.05);
     }
+
     70% {
         transform: scale(0.9);
     }
+
     100% {
         opacity: 1;
         transform: scale(1);
@@ -458,16 +543,20 @@ body {
         opacity: 0;
         transform: perspective(400px) rotateX(90deg);
     }
+
     40% {
         transform: perspective(400px) rotateX(-20deg);
     }
+
     60% {
         opacity: 1;
         transform: perspective(400px) rotateX(10deg);
     }
+
     80% {
         transform: perspective(400px) rotateX(-5deg);
     }
+
     to {
         opacity: 1;
         transform: perspective(400px) rotateX(0deg);
@@ -479,16 +568,20 @@ body {
         opacity: 0;
         transform: perspective(400px) rotateY(90deg);
     }
+
     40% {
         transform: perspective(400px) rotateY(-20deg);
     }
+
     60% {
         opacity: 1;
         transform: perspective(400px) rotateY(10deg);
     }
+
     80% {
         transform: perspective(400px) rotateY(-5deg);
     }
+
     to {
         opacity: 1;
         transform: perspective(400px) rotateY(0deg);
@@ -500,6 +593,7 @@ body {
         opacity: 0;
         transform: scale(0.5);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -508,23 +602,45 @@ body {
 
 /* Background Animation Keyframes */
 @keyframes floatShape {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(30px, -50px) rotate(90deg); }
-    50% { transform: translate(-20px, -100px) rotate(180deg); }
-    75% { transform: translate(-50px, -50px) rotate(270deg); }
-    100% { transform: translate(0, 0) rotate(360deg); }
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    25% {
+        transform: translate(30px, -50px) rotate(90deg);
+    }
+
+    50% {
+        transform: translate(-20px, -100px) rotate(180deg);
+    }
+
+    75% {
+        transform: translate(-50px, -50px) rotate(270deg);
+    }
+
+    100% {
+        transform: translate(0, 0) rotate(360deg);
+    }
 }
 
 @keyframes gridMove {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(50px, 50px); }
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(50px, 50px);
+    }
 }
 
 @keyframes pulseOrb {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
         opacity: 0.05;
     }
+
     50% {
         transform: scale(1.2);
         opacity: 0.1;
@@ -532,9 +648,17 @@ body {
 }
 
 @keyframes waveMove {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 @keyframes particleFloat {
@@ -542,12 +666,15 @@ body {
         transform: translateY(100vh) translateX(0);
         opacity: 0;
     }
+
     10% {
         opacity: 0.4;
     }
+
     90% {
         opacity: 0.4;
     }
+
     100% {
         transform: translateY(-100px) translateX(50px);
         opacity: 0;
@@ -555,8 +682,13 @@ body {
 }
 
 @keyframes rotateLine {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Responsive Animations */
@@ -564,31 +696,32 @@ body {
     .animate-on-scroll {
         transform: translateY(30px);
     }
-    
+
     .tilt-card {
         transform: none !important;
     }
-    
+
     .magnetic {
         transform: none !important;
     }
-    
+
     /* Reduce background animations on mobile */
     .bg-shape {
         display: none;
     }
-    
+
     .bg-orb {
         width: 200px !important;
         height: 200px !important;
     }
-    
+
     .bg-particle {
         display: none;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .animated-bg,
     .bg-shape,
     .bg-orb,
@@ -597,12 +730,6 @@ body {
     .bg-line {
         animation: none !important;
     }
-}ransform: perspective(400px) rotateY(-5deg);
-    }
-    to {
-        opacity: 1;
-        transform: perspective(400px) rotateY(0deg);
-    }
 }
 
 @keyframes zoomIn {
@@ -610,6 +737,7 @@ body {
         opacity: 0;
         transform: scale(0.5);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -618,23 +746,45 @@ body {
 
 /* Background Animation Keyframes */
 @keyframes floatShape {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(30px, -50px) rotate(90deg); }
-    50% { transform: translate(-20px, -100px) rotate(180deg); }
-    75% { transform: translate(-50px, -50px) rotate(270deg); }
-    100% { transform: translate(0, 0) rotate(360deg); }
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    25% {
+        transform: translate(30px, -50px) rotate(90deg);
+    }
+
+    50% {
+        transform: translate(-20px, -100px) rotate(180deg);
+    }
+
+    75% {
+        transform: translate(-50px, -50px) rotate(270deg);
+    }
+
+    100% {
+        transform: translate(0, 0) rotate(360deg);
+    }
 }
 
 @keyframes gridMove {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(50px, 50px); }
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(50px, 50px);
+    }
 }
 
 @keyframes pulseOrb {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
         opacity: 0.05;
     }
+
     50% {
         transform: scale(1.2);
         opacity: 0.1;
@@ -642,9 +792,17 @@ body {
 }
 
 @keyframes waveMove {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 @keyframes particleFloat {
@@ -652,12 +810,15 @@ body {
         transform: translateY(100vh) translateX(0);
         opacity: 0;
     }
+
     10% {
         opacity: 0.4;
     }
+
     90% {
         opacity: 0.4;
     }
+
     100% {
         transform: translateY(-100px) translateX(50px);
         opacity: 0;
@@ -665,8 +826,13 @@ body {
 }
 
 @keyframes rotateLine {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Responsive Animations */
@@ -674,31 +840,32 @@ body {
     .animate-on-scroll {
         transform: translateY(30px);
     }
-    
+
     .tilt-card {
         transform: none !important;
     }
-    
+
     .magnetic {
         transform: none !important;
     }
-    
+
     /* Reduce background animations on mobile */
     .bg-shape {
         display: none;
     }
-    
+
     .bg-orb {
         width: 200px !important;
         height: 200px !important;
     }
-    
+
     .bg-particle {
         display: none;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .animated-bg,
     .bg-shape,
     .bg-orb,

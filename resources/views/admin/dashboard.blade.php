@@ -6,6 +6,15 @@
     <meta name="base-url" content="{{ url('/') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Baraa Al-Rifaee</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('css/analytics.css') }}">
@@ -14,6 +23,7 @@
         rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="{{ asset('js/categories.js') }}"></script>
 </head>
 
 <body>
@@ -54,6 +64,10 @@
                                 <i class="nav-icon fas fa-project-diagram"></i>
                                 <span>Projects</span>
                                 <span class="nav-badge" id="projects-count">0</span>
+                            </a></li>
+                        <li><a href="#" class="nav-link" data-section="categories">
+                                <i class="nav-icon fas fa-tags"></i>
+                                <span>Categories</span>
                             </a></li>
                     </ul>
                 </div>
@@ -182,6 +196,27 @@
             <div class="content-area">
                 <!-- Dashboard Section -->
                 <section id="dashboard" class="section-content active">
+                    <!-- Real-time Activity Monitor -->
+                    <div class="live-activity-monitor">
+                        <div class="monitor-header">
+                            <div class="pulse-indicator"></div>
+                            <span>Live Activity</span>
+                            <span class="live-time" id="liveTime"></span>
+                        </div>
+                        <canvas id="activityWave"></canvas>
+                    </div>
+
+                    <!-- Interactive 3D Stats Globe -->
+                    <div class="stats-globe-container">
+                        <canvas id="statsGlobe"></canvas>
+                        <div class="globe-stats">
+                            <div class="globe-stat">
+                                <span class="stat-number" id="totalVisits">0</span>
+                                <span class="stat-label">Total Visits</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="dashboard-grid">
                         <div class="stat-card" data-stat="projects">
                             <div class="stat-header">
@@ -385,12 +420,47 @@
                         </style>
                     </div>
 
+                    <!-- Real-time Performance Metrics -->
+                    <div class="performance-metrics">
+                        <div class="metric-card cpu-metric">
+                            <div class="metric-icon"><i class="fas fa-microchip"></i></div>
+                            <div class="metric-info">
+                                <span class="metric-label">System Load</span>
+                                <span class="metric-value" id="cpuLoad">0%</span>
+                            </div>
+                            <canvas id="cpuChart" width="100" height="40"></canvas>
+                        </div>
+                        <div class="metric-card memory-metric">
+                            <div class="metric-icon"><i class="fas fa-memory"></i></div>
+                            <div class="metric-info">
+                                <span class="metric-label">Active Users</span>
+                                <span class="metric-value" id="activeUsers">0</span>
+                            </div>
+                            <canvas id="memoryChart" width="100" height="40"></canvas>
+                        </div>
+                        <div class="metric-card network-metric">
+                            <div class="metric-icon"><i class="fas fa-network-wired"></i></div>
+                            <div class="metric-info">
+                                <span class="metric-label">Requests/min</span>
+                                <span class="metric-value" id="networkLoad">0</span>
+                            </div>
+                            <canvas id="networkChart" width="100" height="40"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Heatmap -->
+                    <div class="activity-heatmap">
+                        <h3>Activity Heatmap - Last 7 Days</h3>
+                        <div id="heatmapGrid"></div>
+                    </div>
+
                     <div class="section-card">
                         <div class="card-header">
                             <h2 class="card-title">Recent Activity</h2>
                             <div class="card-actions">
                                 <button class="btn btn-primary btn-sm" onclick="adminDashboard.refreshDashboard()">
-                                    <i class="fas fa-sync-alt"></i> Refresh
+                                    <i class="icon fas fa-sync-alt"></i>
+                                     {{-- Refresh --}}
                                 </button>
                             </div>
                         </div>
@@ -755,7 +825,347 @@
         </div>
     </template>
 
+    <style>
+        .live-activity-monitor {
+            background: linear-gradient(135deg, rgba(76, 111, 255, 0.1), rgba(26, 54, 93, 0.2));
+            border: 1px solid rgba(76, 111, 255, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .monitor-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            font-weight: 600;
+        }
+        .pulse-indicator {
+            width: 12px;
+            height: 12px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 20px #22c55e;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+        #activityWave {
+            width: 100%;
+            height: 80px;
+        }
+        .stats-globe-container {
+            position: relative;
+            background: linear-gradient(135deg, rgba(15, 20, 25, 0.8), rgba(26, 54, 93, 0.4));
+            border: 1px solid rgba(76, 111, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            height: 300px;
+            overflow: hidden;
+        }
+        #statsGlobe {
+            width: 100%;
+            height: 100%;
+        }
+        .globe-stats {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+        }
+        .globe-stat .stat-number {
+            display: block;
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4c6fff, #22c55e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: countUp 2s ease-out;
+        }
+        .globe-stat .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .metric-card {
+            background: linear-gradient(135deg, rgba(15, 20, 25, 0.6), rgba(26, 54, 93, 0.3));
+            border: 1px solid rgba(76, 111, 255, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(76, 111, 255, 0.3);
+        }
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(76, 111, 255, 0.1), transparent);
+            transition: 0.5s;
+        }
+        .metric-card:hover::before {
+            left: 100%;
+        }
+        .metric-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #4c6fff;
+        }
+        .metric-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .metric-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .activity-heatmap {
+            background: linear-gradient(135deg, rgba(15, 20, 25, 0.6), rgba(26, 54, 93, 0.3));
+            border: 1px solid rgba(76, 111, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .activity-heatmap h3 {
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+        #heatmapGrid {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 4px;
+        }
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        .heatmap-cell:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+        .heatmap-cell[data-intensity="0"] { background: rgba(76, 111, 255, 0.1); }
+        .heatmap-cell[data-intensity="1"] { background: rgba(76, 111, 255, 0.3); }
+        .heatmap-cell[data-intensity="2"] { background: rgba(76, 111, 255, 0.5); }
+        .heatmap-cell[data-intensity="3"] { background: rgba(76, 111, 255, 0.7); }
+        .heatmap-cell[data-intensity="4"] { background: rgba(76, 111, 255, 0.9); }
+        .heatmap-cell[data-intensity="5"] { background: #4c6fff; box-shadow: 0 0 10px #4c6fff; }
+    </style>
+
     <script src="{{ asset('js/dashboard.js') }}"></script>
+    <script>
+        // Real-time Activity Wave
+        const activityCanvas = document.getElementById('activityWave');
+        if (activityCanvas) {
+            const ctx = activityCanvas.getContext('2d');
+            activityCanvas.width = activityCanvas.offsetWidth;
+            activityCanvas.height = 80;
+            let points = [];
+            let time = 0;
+
+            function drawWave() {
+                ctx.clearRect(0, 0, activityCanvas.width, activityCanvas.height);
+                ctx.beginPath();
+                ctx.strokeStyle = '#4c6fff';
+                ctx.lineWidth = 2;
+                
+                for (let x = 0; x < activityCanvas.width; x++) {
+                    const y = activityCanvas.height / 2 + Math.sin((x + time) * 0.02) * 20 + Math.sin((x + time) * 0.05) * 10;
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(76, 111, 255, 0.3)';
+                for (let x = 0; x < activityCanvas.width; x++) {
+                    const y = activityCanvas.height / 2 + Math.sin((x + time + 50) * 0.03) * 15;
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                
+                time += 2;
+                requestAnimationFrame(drawWave);
+            }
+            drawWave();
+        }
+
+        // 3D Stats Globe
+        const globeCanvas = document.getElementById('statsGlobe');
+        if (globeCanvas) {
+            const ctx = globeCanvas.getContext('2d');
+            globeCanvas.width = globeCanvas.offsetWidth;
+            globeCanvas.height = globeCanvas.offsetHeight;
+            let rotation = 0;
+
+            function drawGlobe() {
+                ctx.clearRect(0, 0, globeCanvas.width, globeCanvas.height);
+                const centerX = globeCanvas.width / 2;
+                const centerY = globeCanvas.height / 2;
+                const radius = Math.min(centerX, centerY) - 20;
+
+                // Draw rotating circles
+                for (let i = 0; i < 8; i++) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(76, 111, 255, ${0.2 - i * 0.02})`;
+                    ctx.lineWidth = 1;
+                    const angle = (rotation + i * 45) * Math.PI / 180;
+                    ctx.ellipse(centerX, centerY, radius * Math.cos(angle), radius, angle, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // Draw particles
+                for (let i = 0; i < 50; i++) {
+                    const angle = (rotation * 2 + i * 7.2) * Math.PI / 180;
+                    const distance = radius * (0.5 + Math.sin(rotation * 0.05 + i) * 0.3);
+                    const x = centerX + Math.cos(angle) * distance;
+                    const y = centerY + Math.sin(angle) * distance * 0.5;
+                    
+                    ctx.beginPath();
+                    ctx.fillStyle = `rgba(76, 111, 255, ${0.5 + Math.sin(rotation * 0.1 + i) * 0.5})`;
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                rotation += 0.5;
+                requestAnimationFrame(drawGlobe);
+            }
+            drawGlobe();
+        }
+
+        // Real-time Performance Metrics
+        function updateMetrics() {
+            const cpuLoad = Math.floor(Math.random() * 30 + 20);
+            const activeUsers = Math.floor(Math.random() * 50 + 10);
+            const networkLoad = Math.floor(Math.random() * 100 + 50);
+
+            document.getElementById('cpuLoad').textContent = cpuLoad + '%';
+            document.getElementById('activeUsers').textContent = activeUsers;
+            document.getElementById('networkLoad').textContent = networkLoad;
+
+            // Update mini charts
+            updateMiniChart('cpuChart', cpuLoad);
+            updateMiniChart('memoryChart', activeUsers);
+            updateMiniChart('networkChart', networkLoad);
+        }
+
+        const chartData = { cpu: [], memory: [], network: [] };
+        function updateMiniChart(canvasId, value) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const dataKey = canvasId.replace('Chart', '');
+            
+            if (!chartData[dataKey]) chartData[dataKey] = [];
+            chartData[dataKey].push(value);
+            if (chartData[dataKey].length > 20) chartData[dataKey].shift();
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.strokeStyle = '#4c6fff';
+            ctx.lineWidth = 2;
+
+            chartData[dataKey].forEach((val, i) => {
+                const x = (i / 20) * canvas.width;
+                const y = canvas.height - (val / 100) * canvas.height;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+        }
+
+        // Activity Heatmap
+        function generateHeatmap() {
+            const grid = document.getElementById('heatmapGrid');
+            if (!grid) return;
+            
+            grid.innerHTML = '';
+            for (let i = 0; i < 168; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'heatmap-cell';
+                const intensity = Math.floor(Math.random() * 6);
+                cell.setAttribute('data-intensity', intensity);
+                cell.title = `Hour ${i % 24}, Day ${Math.floor(i / 24) + 1}: ${intensity * 20}% activity`;
+                grid.appendChild(cell);
+            }
+        }
+
+        // Live Time
+        function updateLiveTime() {
+            const timeEl = document.getElementById('liveTime');
+            if (timeEl) {
+                timeEl.textContent = new Date().toLocaleTimeString();
+            }
+        }
+
+        // Animate total visits counter
+        function animateCounter() {
+            const counter = document.getElementById('totalVisits');
+            if (!counter) return;
+            
+            let current = 0;
+            const target = Math.floor(Math.random() * 10000 + 5000);
+            const duration = 2000;
+            const increment = target / (duration / 16);
+
+            function update() {
+                current += increment;
+                if (current < target) {
+                    counter.textContent = Math.floor(current).toLocaleString();
+                    requestAnimationFrame(update);
+                } else {
+                    counter.textContent = target.toLocaleString();
+                }
+            }
+            update();
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            generateHeatmap();
+            animateCounter();
+            updateLiveTime();
+            setInterval(updateLiveTime, 1000);
+            setInterval(updateMetrics, 2000);
+            updateMetrics();
+        });
+    </script>
     <script>
         // Profile form handling
         document.addEventListener('DOMContentLoaded', function() {

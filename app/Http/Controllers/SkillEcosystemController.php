@@ -94,23 +94,80 @@ class SkillEcosystemController extends Controller
 
     public function toggleSection(Request $request)
     {
-        $section = EcosystemSection::where('ecosystem', $request->ecosystem)->first();
-        
-        if (!$section) {
-            $section = EcosystemSection::create([
-                'ecosystem' => $request->ecosystem,
-                'title' => ucfirst($request->ecosystem) . ' Ecosystem',
-                'is_visible' => false
+        try {
+            $request->validate([
+                'ecosystem' => 'required|in:javascript,php'
             ]);
+
+            $ecosystem = $request->ecosystem;
+
+            $section = EcosystemSection::where('ecosystem', $ecosystem)->first();
+
+            if (!$section) {
+                // Create section if it doesn't exist with is_visible = true by default
+                $section = EcosystemSection::create([
+                    'ecosystem' => $ecosystem,
+                    'title' => ucfirst($ecosystem) . ' Ecosystem',
+                    'description' => $ecosystem === 'javascript' ? 'Frontend frameworks and libraries' : 'Backend frameworks and tools',
+                    'is_visible' => true // Default to visible when created
+                ]);
+            } else {
+                // Toggle the visibility
+                $section->update(['is_visible' => !$section->is_visible]);
+            }
+
+            // Clear relevant caches
+            $this->clearSkillsCache();
+
+            return response()->json([
+                'success' => true,
+                'is_visible' => $section->is_visible,
+                'message' => ucfirst($ecosystem) . ' ecosystem ' . ($section->is_visible ? 'enabled' : 'disabled') . ' successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating section visibility: ' . $e->getMessage()
+            ], 500);
         }
+    }
 
-        $section->update(['is_visible' => !$section->is_visible]);
+    public function getSkillsForFrontend()
+    {
+        try {
+            $javascriptSection = EcosystemSection::where('ecosystem', 'javascript')
+                ->where('is_visible', true)
+                ->first();
 
-        return response()->json([
-            'success' => true, 
-            'is_visible' => $section->is_visible,
-            'message' => $section->is_visible ? 'Section enabled' : 'Section disabled'
-        ]);
+            $phpSection = EcosystemSection::where('ecosystem', 'php')
+                ->where('is_visible', true)
+                ->first();
+
+            $javascriptSkills = $javascriptSection ?
+                SkillEcosystem::where('ecosystem', 'javascript')
+                ->where('is_active', true)
+                ->orderBy('order')
+                ->get() : collect();
+
+            $phpSkills = $phpSection ?
+                SkillEcosystem::where('ecosystem', 'php')
+                ->where('is_active', true)
+                ->orderBy('order')
+                ->get() : collect();
+
+            return response()->json([
+                'success' => true,
+                'javascriptSection' => $javascriptSection,
+                'phpSection' => $phpSection,
+                'javascriptSkills' => $javascriptSkills,
+                'phpSkills' => $phpSkills
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error loading skills data'
+            ], 500);
+        }
     }
 
     public function updateSection(Request $request)

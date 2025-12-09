@@ -1,81 +1,116 @@
 @extends('layouts.app')
 
-<section class="skills-section">
-   <div class="container">
-      <div class="section-title">
-         <h2>Technical Skills</h2>
-         <p class="section-subtitle">A showcase of my technical expertise across different technology ecosystems</p>
-      </div>
+@section('content')
+   <section class="skills-section">
+      <div class="container">
+         <div class="section-title">
+            <h2>Technical Skills</h2>
+            <p class="section-subtitle">A showcase of my technical expertise across different technology ecosystems</p>
+         </div>
 
          <!-- JavaScript Ecosystem -->
-      @if($javascriptSection)
-      <div class="ecosystem-section animate-on-scroll" data-animation="fadeInUp">
-         <div class="ecosystem-header">
-            <div class="ecosystem-icon">
-               <i class="fab fa-js-square"></i>
-            </div>
-            <div class="ecosystem-content">
-               <h2 class="ecosystem-title">{{ $javascriptSection->title }}</h2>
-               @if($javascriptSection->description)
-               <p class="ecosystem-description">{{ $javascriptSection->description }}</p>
-               @endif
-            </div>
-         </div>
-         
-         <div class="ecosystem-skills">
-            @foreach($javascriptSkills as $skill)
-            <div class="ecosystem-skill-item animate-on-scroll" data-animation="fadeInUp">
-               <div class="ecosystem-skill-icon">
-                  <i class="{{ $skill->icon ?: 'fab fa-js' }}"></i>
-               </div>
-               <div class="ecosystem-skill-info">
-                  <h4 class="ecosystem-skill-name">{{ $skill->name }}</h4>
-                  <div class="ecosystem-skill-progress">
-                     <div class="ecosystem-progress-bar" data-width="{{ $skill->proficiency }}"></div>
-                     <span class="ecosystem-percentage">{{ $skill->proficiency }}%</span>
-                  </div>
-               </div>
-            </div>
-            @endforeach
-         </div>
-      </div>
-      @endif
+         @php
+            $javascriptSection = \App\Models\EcosystemSection::where('ecosystem', 'javascript')
+               ->where('is_visible', true)
+               ->first();
 
-      <!-- PHP Ecosystem -->
-      @if($phpSection)
-      <div class="ecosystem-section animate-on-scroll" data-animation="fadeInUp">
-         <div class="ecosystem-header">
-            <div class="ecosystem-icon">
-               <i class="fab fa-php"></i>
-            </div>
-            <div class="ecosystem-content">
-               <h2 class="ecosystem-title">{{ $phpSection->title }}</h2>
-               @if($phpSection->description)
-               <p class="ecosystem-description">{{ $phpSection->description }}</p>
-               @endif
-            </div>
-         </div>
-         
-         <div class="ecosystem-skills">
-            @foreach($phpSkills as $skill)
-            <div class="ecosystem-skill-item animate-on-scroll" data-animation="fadeInUp">
-               <div class="ecosystem-skill-icon">
-                  <i class="{{ $skill->icon ?: 'fab fa-php' }}"></i>
-               </div>
-               <div class="ecosystem-skill-info">
-                  <h4 class="ecosystem-skill-name">{{ $skill->name }}</h4>
-                  <div class="ecosystem-skill-progress">
-                     <div class="ecosystem-progress-bar" data-width="{{ $skill->proficiency }}"></div>
-                     <span class="ecosystem-percentage">{{ $skill->proficiency }}%</span>
+            $javascriptSkills = $javascriptSection ? \App\Models\SkillEcosystem::where('ecosystem', 'javascript')
+               ->where('is_active', true)
+               ->orderBy('order')
+               ->get() : collect();
+         @endphp
+
+         @if($javascriptSection && $javascriptSkills->count() > 0)
+            <div class="ecosystem-section animate-on-scroll" data-animation="fadeInUp">
+               <div class="ecosystem-header">
+                  <div class="ecosystem-icon">
+                     <i class="fab fa-js-square"></i>
+                  </div>
+                  <div class="ecosystem-content">
+                     <h2 class="ecosystem-title">{{ $javascriptSection->title }}</h2>
+                     @if($javascriptSection->description)
+                        <p class="ecosystem-description">{{ $javascriptSection->description }}</p>
+                     @endif
                   </div>
                </div>
+
+               <div class="ecosystem-skills">
+                  @foreach($javascriptSkills as $skill)
+                     <div class="ecosystem-skill-item animate-on-scroll" data-animation="fadeInUp">
+                        <div class="ecosystem-skill-icon">
+                           <i class="{{ $skill->icon ?: 'fab fa-js' }}"></i>
+                        </div>
+                        <div class="ecosystem-skill-info">
+                           <h4 class="ecosystem-skill-name">{{ $skill->name }}</h4>
+                           <div class="ecosystem-skill-progress">
+                              <div class="ecosystem-progress-bar" data-width="{{ $skill->proficiency }}"></div>
+                              <span class="ecosystem-percentage">{{ $skill->proficiency }}%</span>
+                           </div>
+                        </div>
+                     </div>
+                  @endforeach
+               </div>
             </div>
-            @endforeach
-         </div>
+         @endif
+
+         <!-- PHP Ecosystem -->
+         @php
+            $phpSection = \App\Models\EcosystemSection::where('ecosystem', 'php')
+               ->where('is_visible', true)
+               ->first();
+
+            $phpSkills = $phpSection ? \App\Models\SkillEcosystem::where('ecosystem', 'php')
+               ->where('is_active', true)
+               ->orderBy('order')
+               ->get() : collect();
+         @endphp
+
+         @if($phpSection && $phpSkills->count() > 0)
+            <div class="ecosystem-section animate-on-scroll" data-animation="fadeInUp">
+               <div class="ecosystem-header">
+                  <div class="ecosystem-icon">
+                     <i class="fab fa-php"></i>
+                  </div>
+                  <div class="ecosystem-content">
+                     <h2 class="ecosystem-title">{{ $phpSection->title }}</h2>
+                     @if($phpSection->description)
+                        <p class="ecosystem-description">{{ $phpSection->description }}</p>
+                     @endif
+                  </div>
+               </div>
+
+               <div class="ecosystem-skills">
+                  @foreach($phpSkills as $skill)
+                     <div class="ecosystem-skill-item animate-on-scroll" data-animation="fadeInUp">
+                        <div class="ecosystem-skill-icon">
+                           <i class="{{ $skill->icon ?: 'fab fa-php' }}"></i>
+                        </div>
+                        <div class="ecosystem-skill-info">
+                           <h4 class="ecosystem-skill-name">{{ $skill->name }}</h4>
+                           <div class="ecosystem-skill-progress">
+                              <div class="ecosystem-progress-bar" data-width="{{ $skill->proficiency }}"></div>
+                              <span class="ecosystem-percentage">{{ $skill->proficiency }}%</span>
+                           </div>
+                        </div>
+                     </div>
+                  @endforeach
+               </div>
+            </div>
+         @endif
+
+         <!-- No Skills Message -->
+         @if((!$javascriptSection || $javascriptSkills->count() === 0) && (!$phpSection || $phpSkills->count() === 0))
+            <div class="no-skills-message">
+               <i class="fas fa-code"></i>
+               <h3>Skills Coming Soon</h3>
+               <p>My technical skills are being updated. Please check back later!</p>
+            </div>
+         @endif
       </div>
-      @endif
-   </div>
-</section>
+   </section>
+
+   <!-- Your existing CSS and JavaScript remain the same -->
+@endsection
 
 <style>
    /* Enhanced Skills Section */

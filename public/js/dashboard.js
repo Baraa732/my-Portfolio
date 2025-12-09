@@ -426,8 +426,13 @@ class AdminDashboard {
 
         this.formSubmitHandler = null;
         this.buttonClickHandler = null;
+        this.toggleHandler = null;
+        this.skillButtonHandler = null;
+
         this.isDeleting = false; // Flag to prevent multiple delete operations
         this.isToggling = false; // Flag to prevent multiple toggle operations
+        this.isTogglingSection = false; // NEW: Flag to prevent multiple section toggles
+
         this.init();
         this.initializeCounts();
     }
@@ -1814,6 +1819,35 @@ class AdminDashboard {
     }
 
     // =====================
+    // CATEGORIES MANAGEMENT
+    // =====================
+
+    async getCategoriesContent() {
+        return `
+            <section class="section-content">
+                <div class="section-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Project Categories</h3>
+                        <div class="card-actions">
+                            <button class="btn btn-primary btn-sm" onclick="categoryManager.showAddModal()">
+                                <i class="fas fa-plus"></i> Add Category
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="categories-grid" id="categories-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                            <div class="text-center" style="grid-column: 1/-1; padding: 2rem;">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--gray);"></i>
+                                <p style="color: var(--gray); margin-top: 1rem;">Loading categories...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    // =====================
     // MESSAGES MANAGEMENT
     // =====================
 
@@ -2422,6 +2456,9 @@ class AdminDashboard {
                 case 'projects':
                     html = await this.getProjectsContent();
                     break;
+                case 'categories':
+                    html = await this.getCategoriesContent();
+                    break;
                 case 'messages':
                     html = await this.getMessagesContent();
                     break;
@@ -2447,6 +2484,11 @@ class AdminDashboard {
                 sectionElement.classList.add('active');
             }
 
+            // Load categories if on categories section
+            if (section === 'categories' && window.categoryManager) {
+                setTimeout(() => window.categoryManager.loadCategories(), 100);
+            }
+
             this.bindSectionEvents();
 
         } catch (error) {
@@ -2470,6 +2512,24 @@ class AdminDashboard {
             }
         };
         document.addEventListener('submit', this.formSubmitHandler);
+
+        // Bind ecosystem toggle events - SINGLE event listener with proper delegation
+        this.toggleHandler = (e) => {
+            // Only handle change events from visibility toggles
+            if (e.target.id === 'js-visibility' || e.target.id === 'php-visibility') {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                const ecosystem = e.target.id === 'js-visibility' ? 'javascript' : 'php';
+                const isVisible = e.target.checked;
+
+                console.log(`Toggle ${ecosystem} to:`, isVisible);
+                this.toggleSectionVisibility(ecosystem, isVisible);
+            }
+        };
+
+        // Use capture phase to ensure we catch the event first
+        document.addEventListener('change', this.toggleHandler, true);
 
         // Bind button clicks using simpler event delegation
         this.buttonClickHandler = (e) => {
@@ -2565,16 +2625,18 @@ class AdminDashboard {
         };
 
         document.addEventListener('click', this.buttonClickHandler, true);
-        
-        // Add skill button handlers
-        document.addEventListener('click', (e) => {
+
+        // Add skill button handlers - SINGLE event listener
+        this.skillButtonHandler = (e) => {
             if (e.target.closest('.skill-toggle-btn')) {
                 e.preventDefault();
+                e.stopImmediatePropagation();
                 const btn = e.target.closest('.skill-toggle-btn');
                 this.toggleSkill(parseInt(btn.dataset.skillId));
             }
             if (e.target.closest('.skill-edit-btn')) {
                 e.preventDefault();
+                e.stopImmediatePropagation();
                 const btn = e.target.closest('.skill-edit-btn');
                 this.editSkillEcosystem(
                     parseInt(btn.dataset.skillId),
@@ -2585,19 +2647,13 @@ class AdminDashboard {
             }
             if (e.target.closest('.skill-delete-btn')) {
                 e.preventDefault();
+                e.stopImmediatePropagation();
                 const btn = e.target.closest('.skill-delete-btn');
                 this.deleteSkillEcosystem(parseInt(btn.dataset.skillId));
             }
-        });
-        
-        // Bind ecosystem toggle events
-        document.addEventListener('change', (e) => {
-            if (e.target.id === 'js-visibility') {
-                this.toggleSectionVisibility('javascript', e.target.checked);
-            } else if (e.target.id === 'php-visibility') {
-                this.toggleSectionVisibility('php', e.target.checked);
-            }
-        });
+        };
+
+        document.addEventListener('click', this.skillButtonHandler, true);
     }
 
     removeEventListeners() {
@@ -2607,6 +2663,18 @@ class AdminDashboard {
         if (this.buttonClickHandler) {
             document.removeEventListener('click', this.buttonClickHandler);
         }
+        if (this.toggleHandler) {
+            document.removeEventListener('change', this.toggleHandler, true);
+        }
+        if (this.skillButtonHandler) {
+            document.removeEventListener('click', this.skillButtonHandler);
+        }
+
+        // Reset all handlers
+        this.formSubmitHandler = null;
+        this.buttonClickHandler = null;
+        this.toggleHandler = null;
+        this.skillButtonHandler = null;
     }
 
     initializeModalEvents(modal) {
@@ -2690,7 +2758,17 @@ class AdminDashboard {
     }
 
     async toggleSectionVisibility(ecosystem, isVisible) {
+        // Prevent multiple simultaneous calls
+        if (this.isTogglingSection) {
+            console.log(`Already toggling ${ecosystem}, skipping...`);
+            return;
+        }
+
+        this.isTogglingSection = true;
+
         try {
+            console.log(`Toggling ${ecosystem} visibility to:`, isVisible);
+
             const response = await fetch(`${this.baseUrl}/skills-ecosystem/toggle-section`, {
                 method: 'POST',
                 headers: {
@@ -2701,12 +2779,45 @@ class AdminDashboard {
             });
 
             const result = await response.json();
+
             if (result.success) {
+                // Show only one notification with the message from server
                 this.showNotification(result.message, 'success');
+
+                // Update the checkbox state to match the server response
+                const checkbox = document.getElementById(`${ecosystem}-visibility`);
+                if (checkbox) {
+                    // Only update if different to prevent infinite loops
+                    if (checkbox.checked !== result.is_visible) {
+                        checkbox.checked = result.is_visible;
+                    }
+                    console.log(`Updated ${ecosystem} checkbox to:`, result.is_visible);
+                }
+
+                // Refresh the skills count
+                await this.updateSkillsCount();
+
+            } else {
+                // Revert checkbox on error
+                const checkbox = document.getElementById(`${ecosystem}-visibility`);
+                if (checkbox) {
+                    checkbox.checked = !isVisible;
+                }
+                this.showNotification(result.message || 'Error updating section visibility', 'error');
             }
         } catch (error) {
             console.error('Error toggling section visibility:', error);
+
+            // Revert checkbox on error
+            const checkbox = document.getElementById(`${ecosystem}-visibility`);
+            if (checkbox) {
+                checkbox.checked = !isVisible;
+            }
+
             this.showNotification('Error updating section visibility', 'error');
+        } finally {
+            // Reset the flag
+            this.isTogglingSection = false;
         }
     }
 

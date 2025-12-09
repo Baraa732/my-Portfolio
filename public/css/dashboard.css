@@ -785,14 +785,187 @@ body {
 }
 
 .btn-primary {
+   width: 23%;
+   height: 40px;
+   border: none;
+   border-radius: 20px;
    background: var(--gradient);
    color: var(--light);
    box-shadow: 0 4px 12px rgba(76, 111, 255, 0.3);
+   cursor: pointer;
+   position: relative;
+   overflow: hidden;
+   transition: var(--transition);
+   font-weight: 600;
+   letter-spacing: 0.5px;
+}
+
+/* Gradient shift animation */
+.btn-primary:hover {
+   background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+   transform: translateY(-3px) scale(1.05);
+   box-shadow: 0 8px 25px rgba(76, 111, 255, 0.5);
+   color: var(--light);
+}
+
+/* Ripple effect */
+.btn-primary::before {
+   content: '';
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   width: 0;
+   height: 0;
+   border-radius: 50%;
+   background: rgba(255, 255, 255, 0.2);
+   transform: translate(-50%, -50%);
+   transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::before {
+   width: 300px;
+   height: 300px;
+}
+
+/* Border animation */
+.btn-primary::after {
+   content: '';
+   position: absolute;
+   top: -2px;
+   left: -2px;
+   right: -2px;
+   bottom: -2px;
+   background: var(--gradient);
+   border-radius: 22px;
+   z-index: -1;
+   opacity: 0;
+   transition: opacity 0.3s;
+}
+
+.btn-primary:hover::after {
+   opacity: 1;
+   animation: rotateBorder 2s linear infinite;
+}
+
+@keyframes rotateBorder {
+   0% {
+      transform: rotate(0deg);
+   }
+
+   100% {
+      transform: rotate(360deg);
+   }
+}
+
+/* Pulse animation on hover */
+.btn-primary:hover {
+   animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+   0% {
+      box-shadow: 0 8px 25px rgba(76, 111, 255, 0.5);
+   }
+
+   50% {
+      box-shadow: 0 8px 30px rgba(76, 111, 255, 0.8);
+   }
+
+   100% {
+      box-shadow: 0 8px 25px rgba(76, 111, 255, 0.5);
+   }
+}
+
+/* 3D tilt effect */
+.btn-primary {
+   transform-style: preserve-3d;
+   perspective: 1000px;
 }
 
 .btn-primary:hover {
-   transform: translateY(-3px);
-   box-shadow: 0 8px 20px rgba(76, 111, 255, 0.4);
+   transform: translateY(-3px) rotateX(10deg) rotateY(5deg);
+   box-shadow:
+      0 15px 30px rgba(76, 111, 255, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* Glow effect */
+.btn-primary:hover {
+   filter: brightness(1.1) drop-shadow(0 0 8px rgba(76, 111, 255, 0.6));
+}
+
+/* Text animation */
+.btn-primary span {
+   display: inline-block;
+   transition: transform 0.3s ease;
+}
+
+.btn-primary:hover span {
+   transform: translateY(-1px);
+}
+
+/* Loading bar effect (alternative) */
+.btn-primary.alternative::before {
+   content: '';
+   position: absolute;
+   bottom: 0;
+   left: 0;
+   width: 0%;
+   height: 3px;
+   background: var(--light);
+   transition: width 0.3s ease;
+}
+
+.btn-primary.alternative:hover::before {
+   width: 100%;
+}
+
+/* Bounce animation */
+@keyframes bounce {
+
+   0%,
+   20%,
+   60%,
+   100% {
+      transform: translateY(0);
+   }
+
+   40% {
+      transform: translateY(-10px);
+   }
+
+   80% {
+      transform: translateY(-5px);
+   }
+}
+
+.btn-primary.bounce:hover {
+   animation: bounce 1s;
+}
+
+/* Shine effect */
+.btn-primary.shine {
+   background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+   position: relative;
+   overflow: hidden;
+}
+
+.btn-primary.shine::before {
+   content: '';
+   position: absolute;
+   top: 0;
+   left: -100%;
+   width: 100%;
+   height: 100%;
+   background: linear-gradient(90deg,
+         transparent,
+         rgba(255, 255, 255, 0.4),
+         transparent);
+   transition: left 0.5s;
+}
+
+.btn-primary.shine:hover::before {
+   left: 100%;
 }
 
 .btn-danger {
@@ -820,6 +993,8 @@ body {
 }
 
 .btn-sm {
+   width: 40px;
+   height: 40px;
    padding: 0.5rem 1rem;
    font-size: 0.8rem;
 }
@@ -908,6 +1083,11 @@ body {
    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
    gap: 1.5rem;
    animation: fadeIn 0.8s ease-out;
+   max-width: 100%;
+}
+
+.projects-grid .project-item:only-child {
+   max-width: 450px;
 }
 
 .project-item {
@@ -1608,18 +1788,18 @@ body {
 
 /* Form error styles */
 .form-group .error {
-    border-color: var(--danger) !important;
-    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1) !important;
+   border-color: var(--danger) !important;
+   box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1) !important;
 }
 
 .error-message {
-    color: var(--danger);
-    font-size: 0.8rem;
-    margin-top: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    background: rgba(220, 53, 69, 0.1);
-    border-radius: 4px;
-    border-left: 3px solid var(--danger);
+   color: var(--danger);
+   font-size: 0.8rem;
+   margin-top: 0.25rem;
+   padding: 0.25rem 0.5rem;
+   background: rgba(220, 53, 69, 0.1);
+   border-radius: 4px;
+   border-left: 3px solid var(--danger);
 }
 
 /* Enhanced Input Fields */
@@ -2799,26 +2979,26 @@ body.modal-open-2 {
    .notification-wrapper {
       margin-right: 0.5rem;
    }
-   
+
    .ecosystem-header {
       padding: 1rem;
    }
-   
+
    .header-content {
       flex-direction: column;
       text-align: center;
    }
-   
+
    .header-stats {
       width: 100%;
       justify-content: center;
    }
-   
+
    .panel-header {
       flex-direction: column;
       align-items: flex-start;
    }
-   
+
    .skills-grid {
       grid-template-columns: 1fr;
    }
@@ -3030,14 +3210,14 @@ body.modal-open-2 {
    top: 3px;
    left: 3px;
    transition: var(--transition);
-   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-input:checked + .toggle-label .toggle-slider {
+input:checked+.toggle-label .toggle-slider {
    background: var(--success);
 }
 
-input:checked + .toggle-label .toggle-slider::before {
+input:checked+.toggle-label .toggle-slider::before {
    transform: translateX(24px);
 }
 

@@ -525,17 +525,28 @@ class AdminController extends Controller
             ], 422);
         }
 
-        $data = $request->only(['title', 'description', 'technologies', 'project_url', 'github_url', 'is_active', 'order']);
-
-        // Handle checkbox boolean
-        $data['is_active'] = $request->has('is_active') ? 1 : 0;
-
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('projects', 'public');
-        }
-
         try {
+            $data = $request->only(['title', 'description', 'technologies', 'project_url', 'github_url', 'order']);
+
+            // Handle checkbox boolean properly
+            $data['is_active'] = $request->has('is_active') ? 1 : 0;
+
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imagePath = $image->store('projects', 'public');
+                $data['image'] = $imagePath;
+
+                \Log::info('Image uploaded successfully: ' . $imagePath);
+            } else {
+                \Log::info('No image file in request');
+            }
+
+            \Log::info('Creating project with data: ', $data);
+
             $project = Project::create($data);
+
+            \Log::info('Project created successfully with ID: ' . $project->id);
 
             return response()->json([
                 'success' => true,
@@ -543,6 +554,10 @@ class AdminController extends Controller
                 'project' => $project
             ]);
         } catch (\Exception $e) {
+            \Log::error('Project creation error: ' . $e->getMessage());
+            \Log::error('File: ' . $e->getFile());
+            \Log::error('Line: ' . $e->getLine());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create project: ' . $e->getMessage()

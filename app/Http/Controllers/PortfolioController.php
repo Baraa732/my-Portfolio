@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Analytics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class PortfolioController extends Controller
 {
@@ -62,7 +63,19 @@ class PortfolioController extends Controller
 
     public function projects()
     {
-        $projects = Project::where('is_active', true)->orderBy('order')->get();
+        $projects = Project::where('is_active', true)
+            ->orderBy('order')
+            ->get()
+            ->map(function ($project) {
+                // Add full image URL if image exists
+                if ($project->image) {
+                    $project->image_url = Storage::url($project->image);
+                } else {
+                    $project->image_url = null;
+                }
+                return $project;
+            });
+
         return view('portfolio.projects', compact('projects'));
     }
 
