@@ -1,14 +1,18 @@
 /* Hide Scrollbars */
 * {
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* Internet Explorer 10+ */
 }
 
 *::-webkit-scrollbar {
-    display: none; /* WebKit */
+    display: none;
+    /* WebKit */
 }
 
-html, body {
+html,
+body {
     overflow-x: hidden;
 }
 
@@ -233,13 +237,18 @@ html, body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(45deg, transparent 49%, rgba(255,255,255,0.1) 50%, transparent 51%);
+    background: linear-gradient(45deg, transparent 49%, rgba(255, 255, 255, 0.1) 50%, transparent 51%);
     animation: shimmer 2s infinite;
 }
 
 @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .error-state {
@@ -265,29 +274,29 @@ html, body {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
-    
+
     .analytics-item {
         padding: 0.75rem;
     }
-    
+
     .item-rank {
         width: 32px;
         height: 32px;
         font-size: 0.875rem;
     }
-    
+
     .device-stat {
         grid-template-columns: 1fr;
         gap: 0.75rem;
         text-align: center;
     }
-    
+
     .browser-stat {
         flex-direction: column;
         text-align: center;
         gap: 0.75rem;
     }
-    
+
     .browser-icon {
         margin-right: 0;
     }

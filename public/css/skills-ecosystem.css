@@ -137,11 +137,11 @@ body {
     border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
     background-color: var(--success-color);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
     transform: translateX(26px);
 }
 
@@ -219,7 +219,8 @@ input:checked + .slider:before {
     gap: 5px;
 }
 
-.btn-edit, .btn-delete {
+.btn-edit,
+.btn-delete {
     background: none;
     border: none;
     padding: 8px;
@@ -355,7 +356,8 @@ input:checked + .slider:before {
     font-size: 0.9rem;
 }
 
-.form-group input, .form-group textarea {
+.form-group input,
+.form-group textarea {
     width: 100%;
     padding: 12px;
     border: 2px solid rgba(255, 255, 255, 0.1);
@@ -367,7 +369,8 @@ input:checked + .slider:before {
     backdrop-filter: blur(10px);
 }
 
-.form-group input:focus, .form-group textarea:focus {
+.form-group input:focus,
+.form-group textarea:focus {
     outline: none;
     border-color: var(--accent-color);
     box-shadow: 0 0 0 3px rgba(76, 111, 255, 0.1);
@@ -455,45 +458,45 @@ input:checked + .slider:before {
     .skills-ecosystem-container {
         padding: 15px;
     }
-    
+
     .page-header h1 {
         font-size: 2rem;
     }
-    
+
     .section-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 15px;
     }
-    
+
     .section-title {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
-    
+
     .skills-grid {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+
     .skill-card {
         padding: 15px;
     }
-    
+
     .modal-content {
         width: 95%;
         margin: 10% auto;
     }
-    
+
     .modal form {
         padding: 15px;
     }
-    
+
     .modal-actions {
         flex-direction: column;
     }
-    
+
     .btn {
         width: 100%;
         justify-content: center;
@@ -504,17 +507,17 @@ input:checked + .slider:before {
     .page-header h1 {
         font-size: 1.8rem;
     }
-    
+
     .section-title h2 {
         font-size: 1.3rem;
     }
-    
+
     .skill-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
-    
+
     .skill-actions {
         align-self: flex-end;
     }

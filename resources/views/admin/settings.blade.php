@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,16 +14,16 @@
             margin: 0 auto;
             padding: 2rem;
         }
-        
+
         .settings-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
             padding-bottom: 1rem;
-            border-bottom: 2px solid rgba(255,255,255,0.1);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .settings-title {
             font-size: 2.5rem;
             font-weight: 800;
@@ -31,17 +32,17 @@
             align-items: center;
             gap: 1rem;
         }
-        
+
         .settings-tabs {
             display: flex;
             gap: 0.5rem;
             margin-bottom: 2rem;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             padding: 0.5rem;
             border-radius: 12px;
             backdrop-filter: blur(10px);
         }
-        
+
         .tab-btn {
             padding: 1rem 1.5rem;
             background: transparent;
@@ -55,21 +56,21 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .tab-btn.active {
             background: var(--gradient);
             color: var(--light);
             box-shadow: 0 4px 15px rgba(76, 111, 255, 0.3);
         }
-        
+
         .settings-content {
             display: none;
         }
-        
+
         .settings-content.active {
             display: block;
         }
-        
+
         .settings-section {
             background: linear-gradient(145deg, rgba(26, 54, 93, 0.4), rgba(15, 20, 25, 0.6));
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -78,14 +79,14 @@
             margin-bottom: 2rem;
             backdrop-filter: blur(20px);
         }
-        
+
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
         }
-        
+
         .section-title {
             font-size: 1.5rem;
             font-weight: 700;
@@ -94,7 +95,7 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .permission-badge {
             background: var(--gradient);
             color: var(--light);
@@ -103,75 +104,79 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
-        
+
         .settings-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
         }
-        
+
         .setting-item {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 1.5rem;
             transition: all 0.3s ease;
         }
-        
+
         .setting-item:hover {
             border-color: rgba(76, 111, 255, 0.3);
             box-shadow: 0 4px 20px rgba(76, 111, 255, 0.1);
         }
-        
+
         .setting-label {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0.5rem;
         }
-        
+
         .setting-name {
             font-weight: 600;
             color: var(--light);
             text-transform: capitalize;
         }
-        
+
         .setting-required {
             color: var(--danger);
             font-size: 0.8rem;
         }
-        
-        .form-input, .form-select, .form-textarea {
+
+        .form-input,
+        .form-select,
+        .form-textarea {
             width: 100%;
             padding: 0.75rem 1rem;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             color: var(--light);
             font-size: 0.9rem;
             transition: all 0.3s ease;
         }
-        
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(76, 111, 255, 0.1);
         }
-        
+
         .toggle-switch {
             position: relative;
             width: 50px;
             height: 24px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .toggle-switch.active {
             background: var(--gradient);
         }
-        
+
         .toggle-slider {
             position: absolute;
             top: 2px;
@@ -182,20 +187,20 @@
             border-radius: 50%;
             transition: all 0.3s ease;
         }
-        
+
         .toggle-switch.active .toggle-slider {
             transform: translateX(26px);
         }
-        
+
         .action-buttons {
             display: flex;
             gap: 1rem;
             justify-content: flex-end;
             margin-top: 2rem;
             padding-top: 1rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .btn {
             padding: 0.75rem 1.5rem;
             border: none;
@@ -207,28 +212,28 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .btn-primary {
             background: var(--gradient);
             color: var(--light);
         }
-        
+
         .btn-secondary {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: var(--light);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         .btn-danger {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: var(--light);
         }
-        
+
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
-        
+
         .notification {
             position: fixed;
             top: 20px;
@@ -241,44 +246,50 @@
             transform: translateX(400px);
             transition: all 0.3s ease;
         }
-        
+
         .notification.show {
             transform: translateX(0);
         }
-        
+
         .notification.success {
             background: linear-gradient(135deg, #27ae60, #2ecc71);
         }
-        
+
         .notification.error {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
         }
-        
+
         .loading {
             opacity: 0.6;
             pointer-events: none;
         }
-        
+
         @media (max-width: 768px) {
             .settings-container {
                 padding: 1rem;
             }
-            
+
             .settings-tabs {
                 flex-direction: column;
             }
-            
+
             .settings-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .action-buttons {
                 flex-direction: column;
             }
         }
     </style>
 </head>
+
 <body>
+    <div class="floating-bg">
+        <div class="bg-shape bg-shape-1"></div>
+        <div class="bg-shape bg-shape-2"></div>
+        <div class="bg-shape bg-shape-3"></div>
+    </div>
     <div class="settings-container">
         <div class="settings-header">
             <h1 class="settings-title">
@@ -409,7 +420,7 @@
         let settingsData = {};
         let userPermissions = {};
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadSettings();
             initializeTabs();
         });
@@ -417,7 +428,7 @@
         function initializeTabs() {
             const tabBtns = document.querySelectorAll('.tab-btn');
             tabBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     const tab = this.dataset.tab;
                     switchTab(tab);
                 });
@@ -459,7 +470,7 @@
                 if (!container) return;
 
                 container.innerHTML = '';
-                
+
                 Object.keys(settingsData[group]).forEach(key => {
                     const setting = settingsData[group][key];
                     const settingElement = createSettingElement(key, setting, group);
@@ -476,7 +487,7 @@
             const value = setting.value;
 
             let inputElement = '';
-            
+
             switch (config.type) {
                 case 'boolean':
                     inputElement = `
@@ -495,9 +506,9 @@
                     if (config.options) {
                         inputElement = `
                             <select class="form-select" data-group="${group}" data-key="${key}">
-                                ${config.options.map(option => 
-                                    `<option value="${option}" ${value === option ? 'selected' : ''}>${option}</option>`
-                                ).join('')}
+                                ${config.options.map(option =>
+                            `<option value="${option}" ${value === option ? 'selected' : ''}>${option}</option>`
+                        ).join('')}
                             </select>
                         `;
                     } else {
@@ -519,7 +530,7 @@
         function toggleSetting(element, group, key) {
             element.classList.toggle('active');
             const value = element.classList.contains('active');
-            
+
             if (!settingsData[group]) settingsData[group] = {};
             if (!settingsData[group][key]) settingsData[group][key] = {};
             settingsData[group][key].value = value;
@@ -533,13 +544,13 @@
             inputs.forEach(input => {
                 const key = input.dataset.key;
                 let value = input.value;
-                
+
                 if (input.type === 'number') {
                     value = parseInt(value) || 0;
                 } else if (input.type === 'checkbox') {
                     value = input.checked;
                 }
-                
+
                 if (value !== '' || input.type === 'password') {
                     settings[key] = value;
                 }
@@ -554,7 +565,7 @@
 
             try {
                 container.classList.add('loading');
-                
+
                 const response = await fetch('/admin/settings', {
                     method: 'POST',
                     headers: {
@@ -569,7 +580,7 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (data.success) {
                     showNotification('Settings saved successfully', 'success');
                     loadSettings(); // Reload to get updated values
@@ -600,7 +611,7 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (data.success) {
                     showNotification('Settings reset successfully', 'success');
                     loadSettings();
@@ -628,7 +639,7 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (data.success) {
                     showNotification('Test email sent successfully', 'success');
                 } else {
@@ -643,11 +654,11 @@
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
-            
+
             document.body.appendChild(notification);
-            
+
             setTimeout(() => notification.classList.add('show'), 100);
-            
+
             setTimeout(() => {
                 notification.classList.remove('show');
                 setTimeout(() => notification.remove(), 300);
@@ -655,4 +666,5 @@
         }
     </script>
 </body>
+
 </html>

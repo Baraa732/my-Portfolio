@@ -18,7 +18,9 @@
     --border-radius: 16px;
 }
 
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 /* Container */
 .settings-container {
@@ -118,8 +120,15 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .settings-form {
@@ -206,9 +215,19 @@ textarea.form-control {
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
 }
 
 .error-message {
@@ -356,8 +375,15 @@ textarea.form-control {
 }
 
 @keyframes slideIn {
-    from { opacity: 0; transform: translateX(-20px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .alert-success {
@@ -390,7 +416,9 @@ textarea.form-control {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Permission Badge */
@@ -554,37 +582,37 @@ textarea.form-control {
         margin: 1rem;
         border-radius: 20px;
     }
-    
+
     .settings-header {
         padding: 2rem 1.5rem;
     }
-    
+
     .settings-header h2 {
         font-size: 2.2rem;
     }
-    
+
     .settings-tabs {
         flex-direction: column;
     }
-    
+
     .settings-tab {
         text-align: left;
         padding: 1.2rem;
     }
-    
+
     .settings-content {
         padding: 2rem 1.5rem;
     }
-    
+
     .form-row {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
-    
+
     .btn-group {
         flex-direction: column;
     }
-    
+
     .input-group {
         flex-direction: column;
     }

@@ -22,12 +22,201 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="{{ asset('js/state-manager.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="{{ asset('js/categories.js') }}"></script>
+
+    <style>
+        /* Advanced 3D Background */
+        .dashboard-3d-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            background: radial-gradient(ellipse at top, #0f1419 0%, #000000 100%);
+        }
+
+        #particleCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape-1 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #4c6fff, #1a365d);
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            top: 60%;
+            right: 10%;
+            animation-delay: -5s;
+        }
+
+        .shape-3 {
+            width: 350px;
+            height: 350px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            bottom: 10%;
+            left: 30%;
+            animation-delay: -10s;
+        }
+
+        .shape-4 {
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            top: 40%;
+            right: 30%;
+            animation-delay: -15s;
+        }
+
+        .shape-5 {
+            width: 450px;
+            height: 450px;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            bottom: 20%;
+            right: 20%;
+            animation-delay: -7s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+            }
+
+            25% {
+                transform: translate(50px, -50px) rotate(90deg) scale(1.1);
+            }
+
+            50% {
+                transform: translate(-30px, 30px) rotate(180deg) scale(0.9);
+            }
+
+            75% {
+                transform: translate(40px, 60px) rotate(270deg) scale(1.05);
+            }
+        }
+
+        /* Modern Card Design */
+        .stat-card,
+        .section-card,
+        .form-card {
+            background: rgba(15, 20, 25, 0.7) !important;
+            backdrop-filter: blur(20px) !important;
+            border: 1px solid rgba(76, 111, 255, 0.1) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .stat-card:hover,
+        .section-card:hover {
+            background: rgba(15, 20, 25, 0.85) !important;
+            border: 1px solid rgba(76, 111, 255, 0.3) !important;
+            box-shadow: 0 20px 60px rgba(76, 111, 255, 0.2) !important;
+            transform: translateY(-8px) scale(1.02) !important;
+        }
+
+        /* Glassmorphism Effect */
+        .sidebar {
+            background: rgba(15, 20, 25, 0.8) !important;
+            backdrop-filter: blur(30px) !important;
+            border-right: 1px solid rgba(76, 111, 255, 0.1) !important;
+        }
+
+        .admin-header {
+            background: rgba(15, 20, 25, 0.8) !important;
+            backdrop-filter: blur(30px) !important;
+            border-bottom: 1px solid rgba(76, 111, 255, 0.1) !important;
+        }
+
+        /* Smooth Animations */
+        .dashboard-grid>* {
+            animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+        }
+
+        .dashboard-grid>*:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .dashboard-grid>*:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dashboard-grid>*:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .dashboard-grid>*:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 3D Card Tilt Effect */
+        .stat-card {
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        /* Admin Layout Z-index */
+        .admin-layout {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
 </head>
 
 <body>
+    <!-- Advanced 3D Background -->
+    <div class="dashboard-3d-bg">
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+            <div class="shape shape-5"></div>
+        </div>
+        <canvas id="particleCanvas"></canvas>
+    </div>
+
     <div class="admin-layout">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -282,143 +471,6 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <style>
-                        /* Hide all scrollbars */
-                        * {
-                            scrollbar-width: none;
-                            -ms-overflow-style: none;
-                        }
-                        *::-webkit-scrollbar {
-                            display: none;
-                        }
-                        html, body, .main-content, .content-area {
-                            overflow-x: hidden;
-                        }
-                        
-                        html, body {
-                            background: #0f1419 !important;
-                        }
-                        
-                        /* Apply to all sections */
-                        .section-content {
-                            background: #0f1419 !important;
-                            min-height: 111.11vh !important;
-                        }
-                        
-                        .admin-layout, .main-content, .content-area {
-                            background: #0f1419 !important;
-                            min-height: 111.11vh !important;
-                        }
-                        
-                        /* Scale dashboard to 90% */
-                        body {
-                            zoom: 0.9;
-                        }
-                        
-                        /* Fix sidebar height */
-                        .sidebar {
-                            height: 111.11vh !important;
-                            min-height: 111.11vh !important;
-                        }
-                        
-                        /* Mobile Responsive */
-                        @media (max-width: 768px) {
-                            .sidebar {
-                                position: fixed;
-                                left: -280px;
-                                z-index: 1000;
-                                transition: left 0.3s ease;
-                            }
-                            .sidebar.active {
-                                left: 0;
-                            }
-                            .main-content {
-                                margin-left: 0;
-                                width: 100%;
-                            }
-                            .admin-header {
-                                padding: 0.5rem 1rem;
-                                width: 100% !important;
-                                right: 0 !important;
-                                position: relative !important;
-                            }
-                            .header-left .page-title {
-                                font-size: 1.25rem;
-                            }
-                            .header-right {
-                                gap: 0.5rem;
-                            }
-                            .user-info {
-                                display: none;
-                            }
-                            .dashboard-grid {
-                                grid-template-columns: 1fr;
-                                gap: 1rem;
-                                padding: 1rem;
-                            }
-                            .stat-card {
-                                padding: 1rem;
-                            }
-                            .section-card {
-                                margin: 1rem;
-                                padding: 1rem;
-                            }
-                            .form-grid {
-                                grid-template-columns: 1fr;
-                                gap: 1rem;
-                            }
-                            .modal-content {
-                                width: 95vw;
-                                margin: 1rem;
-                            }
-                            .notifications-dropdown {
-                                right: 0.5rem;
-                                width: calc(100vw - 1rem);
-                                max-width: 350px;
-                            }
-                            .table-container {
-                                overflow-x: auto;
-                            }
-                            .data-table {
-                                min-width: 600px;
-                            }
-                        }
-                        
-                        @media (max-width: 480px) {
-                            .admin-header {
-                                padding: 0.5rem;
-                            }
-                            .header-left .page-title {
-                                font-size: 1.1rem;
-                            }
-                            .dashboard-grid {
-                                padding: 0.5rem;
-                                gap: 0.75rem;
-                            }
-                            .stat-card {
-                                padding: 0.75rem;
-                            }
-                            .stat-value {
-                                font-size: 1.5rem;
-                            }
-                            .section-card {
-                                margin: 0.5rem;
-                                padding: 0.75rem;
-                            }
-                            .modal-content {
-                                width: 98vw;
-                                margin: 0.5rem;
-                            }
-                            .form-group {
-                                margin-bottom: 1rem;
-                            }
-                            .btn {
-                                padding: 0.5rem 1rem;
-                                font-size: 0.875rem;
-                            }
-                        }
-                        </style>
                     </div>
 
                     <!-- Real-time Performance Metrics -->
@@ -461,7 +513,7 @@
                             <div class="card-actions">
                                 <button class="btn btn-primary btn-sm" onclick="adminDashboard.refreshDashboard()">
                                     <i class="icon fas fa-sync-alt"></i>
-                                     {{-- Refresh --}}
+                                    {{-- Refresh --}}
                                 </button>
                             </div>
                         </div>
@@ -836,6 +888,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .monitor-header {
             display: flex;
             align-items: center;
@@ -844,6 +897,7 @@
             color: #fff;
             font-weight: 600;
         }
+
         .pulse-indicator {
             width: 12px;
             height: 12px;
@@ -852,14 +906,26 @@
             animation: pulse 2s infinite;
             box-shadow: 0 0 20px #22c55e;
         }
+
         @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
         }
+
         #activityWave {
             width: 100%;
             height: 80px;
         }
+
         .stats-globe-container {
             position: relative;
             background: linear-gradient(135deg, rgba(15, 20, 25, 0.8), rgba(26, 54, 93, 0.4));
@@ -870,10 +936,12 @@
             height: 300px;
             overflow: hidden;
         }
+
         #statsGlobe {
             width: 100%;
             height: 100%;
         }
+
         .globe-stats {
             position: absolute;
             top: 50%;
@@ -882,6 +950,7 @@
             text-align: center;
             z-index: 10;
         }
+
         .globe-stat .stat-number {
             display: block;
             font-size: 3rem;
@@ -891,18 +960,21 @@
             -webkit-text-fill-color: transparent;
             animation: countUp 2s ease-out;
         }
+
         .globe-stat .stat-label {
             color: rgba(255, 255, 255, 0.7);
             font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
+
         .performance-metrics {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
+
         .metric-card {
             background: linear-gradient(135deg, rgba(15, 20, 25, 0.6), rgba(26, 54, 93, 0.3));
             border: 1px solid rgba(76, 111, 255, 0.2);
@@ -912,10 +984,12 @@
             overflow: hidden;
             transition: all 0.3s;
         }
+
         .metric-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(76, 111, 255, 0.3);
         }
+
         .metric-card::before {
             content: '';
             position: absolute;
@@ -926,31 +1000,37 @@
             background: linear-gradient(90deg, transparent, rgba(76, 111, 255, 0.1), transparent);
             transition: 0.5s;
         }
+
         .metric-card:hover::before {
             left: 100%;
         }
+
         .metric-icon {
             font-size: 2rem;
             margin-bottom: 1rem;
             color: #4c6fff;
         }
+
         .metric-info {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
             margin-bottom: 1rem;
         }
+
         .metric-label {
             color: rgba(255, 255, 255, 0.6);
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
         .metric-value {
             font-size: 2rem;
             font-weight: 700;
             color: #fff;
         }
+
         .activity-heatmap {
             background: linear-gradient(135deg, rgba(15, 20, 25, 0.6), rgba(26, 54, 93, 0.3));
             border: 1px solid rgba(76, 111, 255, 0.2);
@@ -958,16 +1038,19 @@
             padding: 2rem;
             margin-bottom: 2rem;
         }
+
         .activity-heatmap h3 {
             color: #fff;
             margin-bottom: 1.5rem;
             font-size: 1.2rem;
         }
+
         #heatmapGrid {
             display: grid;
             grid-template-columns: repeat(24, 1fr);
             gap: 4px;
         }
+
         .heatmap-cell {
             aspect-ratio: 1;
             border-radius: 4px;
@@ -975,16 +1058,36 @@
             cursor: pointer;
             position: relative;
         }
+
         .heatmap-cell:hover {
             transform: scale(1.2);
             z-index: 10;
         }
-        .heatmap-cell[data-intensity="0"] { background: rgba(76, 111, 255, 0.1); }
-        .heatmap-cell[data-intensity="1"] { background: rgba(76, 111, 255, 0.3); }
-        .heatmap-cell[data-intensity="2"] { background: rgba(76, 111, 255, 0.5); }
-        .heatmap-cell[data-intensity="3"] { background: rgba(76, 111, 255, 0.7); }
-        .heatmap-cell[data-intensity="4"] { background: rgba(76, 111, 255, 0.9); }
-        .heatmap-cell[data-intensity="5"] { background: #4c6fff; box-shadow: 0 0 10px #4c6fff; }
+
+        .heatmap-cell[data-intensity="0"] {
+            background: rgba(76, 111, 255, 0.1);
+        }
+
+        .heatmap-cell[data-intensity="1"] {
+            background: rgba(76, 111, 255, 0.3);
+        }
+
+        .heatmap-cell[data-intensity="2"] {
+            background: rgba(76, 111, 255, 0.5);
+        }
+
+        .heatmap-cell[data-intensity="3"] {
+            background: rgba(76, 111, 255, 0.7);
+        }
+
+        .heatmap-cell[data-intensity="4"] {
+            background: rgba(76, 111, 255, 0.9);
+        }
+
+        .heatmap-cell[data-intensity="5"] {
+            background: #4c6fff;
+            box-shadow: 0 0 10px #4c6fff;
+        }
     </style>
 
     <script src="{{ asset('js/dashboard.js') }}"></script>
@@ -1003,14 +1106,14 @@
                 ctx.beginPath();
                 ctx.strokeStyle = '#4c6fff';
                 ctx.lineWidth = 2;
-                
+
                 for (let x = 0; x < activityCanvas.width; x++) {
                     const y = activityCanvas.height / 2 + Math.sin((x + time) * 0.02) * 20 + Math.sin((x + time) * 0.05) * 10;
                     if (x === 0) ctx.moveTo(x, y);
                     else ctx.lineTo(x, y);
                 }
                 ctx.stroke();
-                
+
                 ctx.beginPath();
                 ctx.strokeStyle = 'rgba(76, 111, 255, 0.3)';
                 for (let x = 0; x < activityCanvas.width; x++) {
@@ -1019,7 +1122,7 @@
                     else ctx.lineTo(x, y);
                 }
                 ctx.stroke();
-                
+
                 time += 2;
                 requestAnimationFrame(drawWave);
             }
@@ -1056,7 +1159,7 @@
                     const distance = radius * (0.5 + Math.sin(rotation * 0.05 + i) * 0.3);
                     const x = centerX + Math.cos(angle) * distance;
                     const y = centerY + Math.sin(angle) * distance * 0.5;
-                    
+
                     ctx.beginPath();
                     ctx.fillStyle = `rgba(76, 111, 255, ${0.5 + Math.sin(rotation * 0.1 + i) * 0.5})`;
                     ctx.arc(x, y, 2, 0, Math.PI * 2);
@@ -1089,10 +1192,10 @@
         function updateMiniChart(canvasId, value) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
-            
+
             const ctx = canvas.getContext('2d');
             const dataKey = canvasId.replace('Chart', '');
-            
+
             if (!chartData[dataKey]) chartData[dataKey] = [];
             chartData[dataKey].push(value);
             if (chartData[dataKey].length > 20) chartData[dataKey].shift();
@@ -1115,7 +1218,7 @@
         function generateHeatmap() {
             const grid = document.getElementById('heatmapGrid');
             if (!grid) return;
-            
+
             grid.innerHTML = '';
             for (let i = 0; i < 168; i++) {
                 const cell = document.createElement('div');
@@ -1139,7 +1242,7 @@
         function animateCounter() {
             const counter = document.getElementById('totalVisits');
             if (!counter) return;
-            
+
             let current = 0;
             const target = Math.floor(Math.random() * 10000 + 5000);
             const duration = 2000;
@@ -1158,26 +1261,144 @@
         }
 
         // Initialize everything
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             generateHeatmap();
             animateCounter();
             updateLiveTime();
             setInterval(updateLiveTime, 1000);
             setInterval(updateMetrics, 2000);
             updateMetrics();
+            initParticles();
+            init3DCardTilt();
         });
+
+        // Advanced Particle System
+        function initParticles() {
+            const canvas = document.getElementById('particleCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const particleCount = 100;
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.z = Math.random() * 1000;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.vz = Math.random() * 2 + 1;
+                    this.size = Math.random() * 2 + 1;
+                    this.color = `rgba(76, 111, 255, ${Math.random() * 0.5 + 0.3})`;
+                }
+
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.z -= this.vz;
+
+                    if (this.z < 1) {
+                        this.z = 1000;
+                        this.x = Math.random() * canvas.width;
+                        this.y = Math.random() * canvas.height;
+                    }
+
+                    if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                }
+
+                draw() {
+                    const scale = 1000 / this.z;
+                    const x2d = (this.x - canvas.width / 2) * scale + canvas.width / 2;
+                    const y2d = (this.y - canvas.height / 2) * scale + canvas.height / 2;
+                    const size2d = this.size * scale;
+
+                    ctx.beginPath();
+                    ctx.fillStyle = this.color;
+                    ctx.arc(x2d, y2d, size2d, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Draw connections
+                    particles.forEach(p => {
+                        const dx = this.x - p.x;
+                        const dy = this.y - p.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < 100) {
+                            const px2d = (p.x - canvas.width / 2) * (1000 / p.z) + canvas.width / 2;
+                            const py2d = (p.y - canvas.height / 2) * (1000 / p.z) + canvas.height / 2;
+
+                            ctx.beginPath();
+                            ctx.strokeStyle = `rgba(76, 111, 255, ${0.2 * (1 - dist / 100)})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.moveTo(x2d, y2d);
+                            ctx.lineTo(px2d, py2d);
+                            ctx.stroke();
+                        }
+                    });
+                }
+            }
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        // 3D Card Tilt Effect
+        function init3DCardTilt() {
+            const cards = document.querySelectorAll('.stat-card, .section-card');
+
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+
+                    const rotateX = (y - centerY) / 10;
+                    const rotateY = (centerX - x) / 10;
+
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                });
+            });
+        }
     </script>
     <script>
         // Profile form handling
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const profileForm = document.getElementById('profile-form');
             const passwordForm = document.getElementById('password-form');
-            
+
             if (profileForm) {
-                profileForm.addEventListener('submit', function(e) {
+                profileForm.addEventListener('submit', function (e) {
                     e.preventDefault();
                     const formData = new FormData(this);
-                    
+
                     fetch('/admin/profile', {
                         method: 'POST',
                         body: formData,
@@ -1185,33 +1406,33 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         }
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Profile updated successfully!');
-                            // Update dashboard UI
-                            document.querySelector('.user-name').textContent = data.user.name;
-                            document.querySelector('.user-avatar').textContent = data.user.name.charAt(0);
-                            // Refresh activities
-                            setTimeout(() => {
-                                adminDashboard.loadDashboardData();
-                                location.reload();
-                            }, 1000);
-                        } else {
-                            alert('Error: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        alert('Error updating profile');
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Profile updated successfully!');
+                                // Update dashboard UI
+                                document.querySelector('.user-name').textContent = data.user.name;
+                                document.querySelector('.user-avatar').textContent = data.user.name.charAt(0);
+                                // Refresh activities
+                                setTimeout(() => {
+                                    adminDashboard.loadDashboardData();
+                                    location.reload();
+                                }, 1000);
+                            } else {
+                                alert('Error: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            alert('Error updating profile');
+                        });
                 });
             }
-            
+
             if (passwordForm) {
-                passwordForm.addEventListener('submit', function(e) {
+                passwordForm.addEventListener('submit', function (e) {
                     e.preventDefault();
                     const formData = new FormData(this);
-                    
+
                     fetch('/admin/profile/password', {
                         method: 'POST',
                         body: formData,
@@ -1219,20 +1440,20 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         }
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Password updated successfully!');
-                            passwordForm.reset();
-                            // Refresh activities
-                            setTimeout(() => adminDashboard.loadDashboardData(), 500);
-                        } else {
-                            alert('Error: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        alert('Error updating password');
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Password updated successfully!');
+                                passwordForm.reset();
+                                // Refresh activities
+                                setTimeout(() => adminDashboard.loadDashboardData(), 500);
+                            } else {
+                                alert('Error: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            alert('Error updating password');
+                        });
                 });
             }
         });

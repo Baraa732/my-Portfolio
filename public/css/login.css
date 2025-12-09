@@ -12,8 +12,7 @@
     --warning: #ed8936;
 
     /* --gradient: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); */
-        --gradient: linear-gradient(135deg, #ffffff 0%, var(--accent) 60%)
-    --gradient-dark: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
+    --gradient: linear-gradient(135deg, #ffffff 0%, var(--accent) 60%) --gradient-dark: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
     --shadow: 0 20px 60px rgba(15, 20, 25, 0.4);
     --shadow-lg: 0 30px 80px rgba(15, 20, 25, 0.6);
 

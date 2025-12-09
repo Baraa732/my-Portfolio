@@ -1,0 +1,124 @@
+/* ========================================
+   WELCOME SECTION STYLES
+   ======================================== */
+
+.welcome-section {
+    background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0 6px, transparent 6px 24px), 
+                linear-gradient(135deg, #0e1330 0%, #17173a 100%);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 32px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(14, 19, 48, 0.3);
+    animation: fadeInUp 0.8s ease-out;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.welcome-bg-1 {
+    content: '';
+    position: absolute;
+    width: 180%;
+    height: 120%;
+    left: -40%;
+    top: -10%;
+    transform: rotate(-18deg);
+    background: linear-gradient(180deg, rgba(36, 26, 70, 0.98) 0%, rgba(28, 20, 58, 0.95) 100%);
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.35));
+    pointer-events: none;
+}
+
+.welcome-bg-2 {
+    content: '';
+    position: absolute;
+    width: 140%;
+    height: 90%;
+    right: -30%;
+    bottom: -20%;
+    transform: rotate(12deg);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.0) 40%);
+    clip-path: polygon(0 0, 80% 0, 95% 100%, 0% 100%);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
+.welcome-orb {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    right: -30px;
+    top: 40%;
+    border-radius: 50%;
+    transform: translateY(-50%) rotate(-10deg);
+    background: radial-gradient(circle at 30% 30%, #667eea 0%, #764ba2 45%, rgba(102, 126, 234, 0.85) 60%, transparent 70%);
+    filter: blur(0.6px);
+    mix-blend-mode: screen;
+    opacity: 0.98;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.welcome-square {
+    position: absolute;
+    left: 15%;
+    top: 15%;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.12), inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+    transform: rotate(-12deg);
+    pointer-events: none;
+    z-index: 1;
+    animation: float 3s infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-12deg); }
+    50% { transform: translateY(-10px) rotate(-12deg); }
+}
+
+.welcome-dots {
+    position: absolute;
+    right: 15px;
+    top: 20%;
+    display: grid;
+    grid-template-columns: repeat(3, 4px);
+    gap: 6px;
+    transform: rotate(-8deg);
+    opacity: 0.95;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 1px;
+    background: linear-gradient(180deg, #fff5e6, rgba(255, 255, 255, 0.7));
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    display: block;
+}
+
+.welcome-content {
+    position: relative;
+    z-index: 2;
+}
+
+.welcome-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: white;
+    animation: slideInLeft 0.8s ease-out;
+}
+
+.welcome-subtitle {
+    opacity: 0.9;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    animation: slideInLeft 0.8s ease-out 0.2s both;
+}
